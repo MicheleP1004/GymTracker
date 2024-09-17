@@ -1,16 +1,17 @@
 <script>
     // Potresti mettere qui la logica per gestire la lista delle chat
+    import ChatButton from "./ChatButton.svelte";
 </script>
 
 <style>
   /* Stile specifico per la lista delle chat */
+  .chat-list {
+    background-color:#ffffff;
+    padding: 5px;
+    overflow-y: auto;
+  }
 </style>
 
-<div>
-    <!-- Qui verrà visualizzata la lista delle chat -->
-    <ul>
-        <li>Chat 1</li>
-        <li>Chat 2</li>
-        <li>Chat 3</li>
-    </ul>
+<div class="chat-list">
+    <ChatButton></ChatButton>
 </div>
