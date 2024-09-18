@@ -49,10 +49,10 @@
 </style>
 
 <div class="chat-list">
-    {#each chats2 as chat (chat.name)}
-        {#if (chat === null)}
+    {#each chats as chat (chat.name)}
+        <!-- {#if (chat === null)}
             <h1>Ciao</h1>
-        {/if}
+        {/if} -->
         <ChatButton propic={chat.propic} chatName={chat.name} />
     {/each}
 </div>

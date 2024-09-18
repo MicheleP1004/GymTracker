@@ -1,6 +1,12 @@
 <script lang="ts">
     export let propic: string;
     export let chatName: string;
+    import Chat from '../lib/components/Chat.svelte';
+    let chatVisible:boolean = false;
+
+    function triggerChat():void{
+      chatVisible = !chatVisible;
+    }
 </script>
   
   <style>
@@ -31,9 +37,10 @@
       font-weight: 500;
     }
   </style>
-  
-  <div class="box">
-    <img class="pro-pic" src={propic} alt="Default">
-    <h3 class="text">{chatName}</h3>
-  </div>
+  <Chat>
+    <button class="box" on:click={triggerChat} on:keyup={triggerChat}>
+      <img class="pro-pic" src={propic} alt="Default">
+      <h3 class="text">{chatName}</h3>
+    </button>
+  </Chat>
   
