@@ -10,6 +10,6 @@
   }
 </style>
 
-<div>
+<div class="main-content">
     
 </div>

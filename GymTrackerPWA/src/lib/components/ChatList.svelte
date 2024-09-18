@@ -14,7 +14,7 @@
   
     //array di prova
     let chats: Chat[] = [];
-    let chats2: Chat[] = [];
+    // let chats2: Chat[] = [];
   
     function createChats() {
       const defaultProPic = '/DefaultPics/ProfilePicture.jpg';

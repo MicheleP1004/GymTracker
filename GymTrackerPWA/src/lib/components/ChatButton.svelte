@@ -1,11 +1,17 @@
 <script lang="ts">
     export let propic: string;
     export let chatName: string;
-    import Chat from '../lib/components/Chat.svelte';
-    let chatVisible:boolean = false;
+
+    // let {propicm chatName} = $props();
+    import Chat from './Chat.svelte';
+    let chatVisible:boolean = false; 
 
     function triggerChat():void{
       chatVisible = !chatVisible;
+    }
+
+    function handleChatClosure(){
+      chatVisible = false;
     }
 </script>
   
@@ -37,10 +43,13 @@
       font-weight: 500;
     }
   </style>
-  <Chat>
-    <button class="box" on:click={triggerChat} on:keyup={triggerChat}>
-      <img class="pro-pic" src={propic} alt="Default">
-      <h3 class="text">{chatName}</h3>
-    </button>
-  </Chat>
+
+  <div class="box" on:click={triggerChat} on:keyup={triggerChat} role="button" tabindex="0">
+    <img class="pro-pic" src={propic} alt="Default">
+    <h3 class="text">{chatName}</h3>
+  </div>
+
+  {#if chatVisible}
+    <Chat visibility={chatVisible} on:chat-closed={handleChatClosure}/>
+  {/if}
   
