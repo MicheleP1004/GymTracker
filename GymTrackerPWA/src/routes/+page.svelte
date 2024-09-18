@@ -1,5 +1,4 @@
 <script>
-    // Importa eventuali componenti se li hai già creati
     import ChatList from '../lib/components/ChatList.svelte';
     import MainContent from '../lib/components/MainContent.svelte';
 </script>
@@ -13,18 +12,9 @@
     padding: 0.5%;
     box-sizing: border-box;
   }
-
-  .main-content {
-    background-color: #ffffff;
-    padding: 0px;
-    overflow-y: auto;
-  }
 </style>
 
 <div class="grid-container">
-  <div class="main-content">
-    <slot name="main"></slot>
-  </div>
-
+  <MainContent></MainContent>
   <ChatList></ChatList>
 </div>
