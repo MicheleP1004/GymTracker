@@ -10,6 +10,8 @@
     margin : 0%;
     height: 100vh;
     grid-template-columns: 2fr 1fr;
+    padding: 0.5%;
+    box-sizing: border-box;
   }
 
   .main-content {

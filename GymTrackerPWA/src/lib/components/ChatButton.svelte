@@ -1,7 +1,6 @@
 <script lang="ts">
-    //aggiungere codice per scaricare pro pic 
-    let propic:string = '/DefaultPics/ProfilePicture.jpg';
-    let user:string = 'Utente';
+    export let propic: string;
+    export let chatName: string;
 </script>
   
   <style>
@@ -9,20 +8,24 @@
       display: flex;
       align-items: center; 
       background-color: #e3f1e9;
-      border-radius: 12px;
-      height: 60px;
-      width: 99%;
-      padding: 5px;
+      height: 11%;
+      width: 100%;
+      padding: 2%;
+      box-sizing: border-box;
+      transition: background-color 0.1s;
+      cursor: pointer;
+    }
+    .box:hover{
+        background-color: #d8ebe0;
     }
     .pro-pic {
-      
       height: 100%;
-      width: 12%;
+      width: 11%;
       border-radius: 50%;
       object-fit: cover;
     }
     .text {
-      margin-left: 10px; 
+      margin-left: 2%; 
       font-style: normal;
       font-family: Arial, Helvetica, sans-serif;
       font-weight: 500;
@@ -30,8 +33,7 @@
   </style>
   
   <div class="box">
-    
-    <img class="pro-pic" src={propic} alt="">
-    <h3 class="text">{user}</h3>
+    <img class="pro-pic" src={propic} alt="Default">
+    <h3 class="text">{chatName}</h3>
   </div>
   
