@@ -8,7 +8,7 @@
     display: grid;
     margin : 0%;
     height: 100vh;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 70% 30%;
     padding: 0.5%;
     box-sizing: border-box;
   }
