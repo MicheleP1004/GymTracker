@@ -48,20 +48,22 @@
       background-color: #ffff;
       box-sizing: border-box;
       cursor: pointer;
+      display: grid;
+      place-items: center;
     }
     .exit-button:hover{
       background-color: #d8ebe0;
     }
-    /* .center{
+    .center{
       align-items: center; 
-    } */
+    }
   </style>
   
   {#if visibility}
     <div class="overlay"></div>
     <div class="modal">
       <div class="exit-button" on:click={close} on:keyup={close} role="button" tabindex= 0>
-        <!-- <img class="center" src="/DefaultPics/XIcon.png" alt=""> -->
+        <img class="center" src="/DefaultPics/XIcon.png" alt="">
       </div>
     </div>
   {/if}
