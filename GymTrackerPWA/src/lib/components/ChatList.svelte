@@ -13,22 +13,21 @@
     }
   
     //array di prova
-    let chats: Chat[] = [];
+    const state = $state({chats:[] as Chat[]});
     // let chats2: Chat[] = [];
   
     function createChats() {
       const defaultProPic = '/DefaultPics/ProfilePicture.jpg';
-  
+      let tempChats:Chat[] = [];
       for (let i = 0; i < 15; i++) {
-        chats.push(new Chat(`Prova ${i + 1}`, defaultProPic));
+        tempChats.push(new Chat(`Prova ${i + 1}`, defaultProPic));
       }
+      state.chats = tempChats;
     }
     
     //popolo l'array dopo la creazione del DOM 
     onMount(() => {
       createChats();
-      //forza l'aggiornamento dell'array dopo la creazione delle chat
-      chats = [...chats];
     });
 </script>
 
@@ -49,10 +48,7 @@
 </style>
 
 <div class="chat-list">
-    {#each chats as chat (chat.name)}
-        <!-- {#if (chat === null)}
-            <h1>Ciao</h1>
-        {/if} -->
+    {#each state.chats as chat (chat.name)}
         <ChatButton propic={chat.propic} chatName={chat.name} />
     {/each}
 </div>

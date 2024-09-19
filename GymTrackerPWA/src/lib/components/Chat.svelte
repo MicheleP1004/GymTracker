@@ -1,10 +1,13 @@
 <script  lang="ts">
   import {createEventDispatcher} from 'svelte';
   const dispatch = createEventDispatcher();
-    export let visibility:boolean;
+    // export let visibility:boolean;
+    //flag di visibilità
+    let {visibility}: {visibility:boolean} = $props();
 
     function close():void{
       visibility=false;
+      //comunica evento di chiusura al padre
       dispatch('chat-closed',{text: "chat closed"});
     }
 
@@ -20,7 +23,6 @@
       left: 50%;
       transform: translate(-50%, -50%);
       background-color: white;
-      /* padding: 20px; */
       border-radius: 12px;
       box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
       z-index: 1000;
@@ -62,7 +64,7 @@
   {#if visibility}
     <div class="overlay"></div>
     <div class="modal">
-      <div class="exit-button" on:click={close} on:keyup={close} role="button" tabindex= 0>
+      <div class="exit-button" onclick={close} onkeyup={close} role="button" tabindex= 0>
         <img class="center" src="/DefaultPics/XIcon.png" alt="">
       </div>
     </div>

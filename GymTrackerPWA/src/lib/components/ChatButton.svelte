@@ -1,15 +1,18 @@
 <script lang="ts">
-    export let propic: string;
-    export let chatName: string;
+    // export let propic: string;
+    // export let chatName: string;
 
-    // let {propicm chatName} = $props();
+    let {propic, chatName}: {propic:string, chatName:string} = $props();
+
     import Chat from './Chat.svelte';
-    let chatVisible:boolean = false; 
+    //flag per il caricamento della chat
+    let chatVisible:boolean = $state(false); 
 
     function triggerChat():void{
       chatVisible = !chatVisible;
     }
 
+    //handler chiusura chat
     function handleChatClosure(){
       chatVisible = false;
     }
@@ -44,12 +47,14 @@
     }
   </style>
 
-  <div class="box" on:click={triggerChat} on:keyup={triggerChat} role="button" tabindex="0">
+  <div class="box" onclick={triggerChat} onkeyup={triggerChat} role="button" tabindex="0">
     <img class="pro-pic" src={propic} alt="Default">
     <h3 class="text">{chatName}</h3>
   </div>
 
+  <!-- carico la chat solo se viene aperta -->
   {#if chatVisible}
+  <!-- assegno handler evento chiusura chat -->
     <Chat visibility={chatVisible} on:chat-closed={handleChatClosure}/>
   {/if}
   
