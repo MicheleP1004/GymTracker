@@ -27,7 +27,7 @@
       width: 100%;
       padding: 2%;
       box-sizing: border-box;
-      transition: background-color 0.1s;
+      transition: background-color 0.05s;
       cursor: pointer;
     }
     .box:hover{
