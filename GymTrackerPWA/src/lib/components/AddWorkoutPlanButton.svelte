@@ -1,5 +1,17 @@
 <script lang="ts">
+    import Planner from "./Planner.svelte";
+
     const addPlanImg:string ="/DefaultPics/icons8-writing-50.png";
+
+    let plannerVisibility:boolean = $state(false);
+
+    function triggerPlanner(){
+        plannerVisibility = !plannerVisibility;
+    }
+
+    function handleClosure(){
+        plannerVisibility = false;
+    }
 </script>
 
 <style>
@@ -20,6 +32,10 @@
     }
 </style>
 
-<div class="button">
+<div class="button" onclick={triggerPlanner} onkeyup={triggerPlanner} role="button" tabindex="0">
     <img class="center" src={addPlanImg} alt="">
 </div>
+
+{#if plannerVisibility}
+    <Planner visibility={plannerVisibility} on:planner-closed={handleClosure}></Planner>
+{/if}

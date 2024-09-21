@@ -12,8 +12,8 @@
       detailsVisibility = !detailsVisibility;
     }
 
-    //handler chiusura chat
-    function handleChatClosure(){
+    //handler chiusura finestra
+    function handleClosure(){
       detailsVisibility = false;
     }
 </script>
@@ -48,6 +48,6 @@
   <!-- carico la chat solo se viene aperta -->
   {#if detailsVisibility}
   <!-- assegno handler evento chiusura chat -->
-    <WorkoutDetails visibility={detailsVisibility} on:chat-closed={handleChatClosure}/>
+    <WorkoutDetails visibility={detailsVisibility} on:details-closed={handleClosure}/>
   {/if}
   

@@ -1,5 +1,16 @@
 <script lang="ts">
+    import Adder from "./Adder.svelte";
     const plusImg:string ="/DefaultPics/icons8-plus-50.png";
+
+    let adderVisibility:boolean = $state(false);
+
+    function triggerAdder(){
+        adderVisibility = !adderVisibility;
+    }
+
+    function handleClosure(){
+        adderVisibility = false;
+    }
 </script>
 
 <style>
@@ -20,6 +31,10 @@
     }
 </style>
 
-<div class="button">
+<div class="button" onclick={triggerAdder} onkeyup={triggerAdder} role="button" tabindex="0">
     <img class="center" src={plusImg} alt="">
 </div>
+
+{#if (adderVisibility)}
+    <Adder visibility={adderVisibility} on:adder-closed={handleClosure}></Adder>
+{/if}

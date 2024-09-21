@@ -1,14 +1,14 @@
 <script  lang="ts">
     import {createEventDispatcher} from 'svelte';
     const dispatch = createEventDispatcher();
-      // export let visibility:boolean;
+    
       //flag di visibilità
       let {visibility}: {visibility:boolean} = $props();
   
       function close():void{
         visibility=false;
         //comunica evento di chiusura al padre
-        dispatch('details-closed',{text: "details closed"});
+        dispatch('adder-closed',{text: "adder closed"});
       }
   
   </script>
