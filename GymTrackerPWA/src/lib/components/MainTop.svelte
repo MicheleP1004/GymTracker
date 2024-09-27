@@ -1,6 +1,11 @@
 <script lang="ts">
     import ProfileInfo from "./ProfileInfo.svelte";
 
+    // import {stato} from "../../globalState.svelte";
+    import * as stato from '../../globalState.svelte';
+
+    let utente = stato.getUtente();
+
     let img:string = '/DefaultPics/ProfilePicture.jpg';
 
     let cardioImg:string = '/DefaultPics/icons8-cardio-50.png';
@@ -39,8 +44,9 @@
   }
 </style>
 
+<!-- <h1>{stato.utente.email}</h1> -->
 <div class="main-top">
-    <ProfileInfo propic={img} userName={"Utente prova"}></ProfileInfo>
+    <ProfileInfo propic={img} userName={utente.username} bio={utente.bio}></ProfileInfo>
     <div class="icons-section">
       <div class="icon-border">
         <img class="icon" src={cardioImg} alt="">

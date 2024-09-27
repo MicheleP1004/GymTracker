@@ -4,10 +4,20 @@
   import { auth } from '../firebase';
   import { onAuthStateChanged } from 'firebase/auth';
   import type { User } from 'firebase/auth';
-  
+  import type { UserCredential } from 'firebase/auth'; 
+  import type {Utente} from '../globalState.svelte';
+
   import ChatList from '../lib/components/ChatList.svelte';
   import MainContent from '../lib/components/MainContent.svelte';
   import ResearchBar from '../lib/components/ResearchBar.svelte';
+
+  import * as db from '../firestore';
+  // import {stato} from '../globalState.svelte';
+  import * as stato from '../globalState.svelte';
+
+  let utente = stato.getUtente();
+
+  // export const stato = creaUtente();
 
   let user: User | null = null;
   let email: string = '';
@@ -18,6 +28,10 @@
   let registerEmail: string = '';
   let registerPassword: string = '';
   let registerError: string | null = null;
+  let registerName: string = '';
+  let registerBio: string = '';
+
+  let userCred:UserCredential| null = null;
 
   //monitorare lo stato di autenticazione
   onMount(() => {
@@ -29,8 +43,17 @@
   //funzione per il login con email e password
   async function handleLogin() {
     try {
-      await loginUser(email, password);  //login
+      userCred = await loginUser(email, password);  //login
       error = null;
+
+      if(userCred != null){
+        let data: Utente | null = await(db.getUserData(userCred.user.uid));
+        if(data != null)
+          // stato.utente = data;
+          // stato.setUtente(data);
+          utente.email = "prova";
+      }
+
     } catch (err) {
       if (err instanceof Error) {
         error = 'Errore durante il login: ' + err.message;
@@ -45,6 +68,15 @@
     try {
       await logoutUser();   //logout
       user = null;
+      stato.setUtente({
+        uid: '',
+        email: '',
+        username: '',
+        bio: '',
+        friends: [],
+        workouts: [],
+        plans: [],
+      })
     } catch (err) {
       if (err instanceof Error) {
         error = 'Errore durante il logout: ' + err.message;
@@ -57,8 +89,16 @@
   //funzione per il login con Google
   async function handleLoginWithGoogle() {
     try {
-      await loginWithGoogle();
+      userCred = await loginWithGoogle();
       error = null;
+
+      if(userCred != null){
+        let data: Utente | null = await(db.getUserData(userCred.user.uid));
+        if(data != null)
+          // stato.utente = data;
+          stato.setUtente(data);
+      }
+
     } catch (err) {
       if (err instanceof Error) {
         error = 'Errore durante il login con Google: ' + err.message;
@@ -75,10 +115,27 @@
 
   //funzione per la registrazione
   async function handleRegister() {
+    if(registerName == ''){
+      registerName = registerEmail.slice(0,registerEmail.search("@"));
+    }
+
+    if(registerBio == ''){
+      registerBio = "";
+    }
+
+    console.log(registerName+" "+registerEmail);
     try {
-      await registerUser(registerEmail, registerPassword); // Registra l'utente
+      userCred = await registerUser(registerEmail, registerPassword, registerName, registerBio);
       registerError = null;
-      showRegisterForm = false; // Nascondi il form dopo la registrazione
+      showRegisterForm = false; //nasconde il form dopo la registrazione
+
+      if(userCred != null){
+        let data: Utente | null = await(db.getUserData(userCred.user.uid));
+        if(data != null)
+          // stato.utente = data;
+          stato.setUtente(data);
+      }
+
     } catch (err) {
       if (err instanceof Error) {
         registerError = 'Errore durante la registrazione: ' + err.message;
@@ -155,6 +212,7 @@
   }
 </style>
 
+<h1>{stato.getUtente().email}</h1>
 {#if user}
   <div class="top-bar">
     <h1 class="text">GymTracker</h1>
@@ -179,7 +237,7 @@
     <button class="auth-button" onclick={handleLogin}>Login</button>
     <h5 class="text">Oppure</h5>
     <button class="auth-button" onclick={handleLoginWithGoogle}>
-      <img src=".\DefaultPics\icons8-logo-di-google-48.png" alt="Google Logo" class="google-icon" /> <!-- Aggiunge il logo di Google -->
+      <img src=".\DefaultPics\icons8-logo-di-google-48.png" alt="Google Logo" class="google-icon" />
       Login con Google
     </button>
     <button class="auth-button" onclick={toggleRegisterForm}>Registrati</button>
@@ -190,6 +248,8 @@
         <h2 class="text">Registrazione:</h2>
         <input class="input-field" type="email" bind:value={registerEmail} placeholder="Email" />
         <input class="input-field" type="password" bind:value={registerPassword} placeholder="Password" />
+        <input class="input-field" type="text" bind:value={registerName} placeholder="Username"/>
+        <input class="input-field" type="text" bind:value={registerBio} placeholder="Bio" />
         {#if registerError}
           <p class="error-message">{registerError}</p>
         {/if}

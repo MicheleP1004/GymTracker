@@ -1,5 +1,5 @@
 <script lang="ts">
-    let {propic,userName}: {propic:string,userName:string} = $props();
+    let {propic,userName,bio}: {propic:string,userName:string,bio:string} = $props();
 </script>
 
 <style>
@@ -52,5 +52,5 @@
         </div>
         <h2 class="text">{userName}</h2>
     </div>
-    <p class="text">Esempio di bio ciaociaociaociaociao</p>
+    <p class="text">{bio}</p>
 </div>

@@ -2,10 +2,7 @@
     import MainTop from "./MainTop.svelte";
     import WorkoutList from "./WorkoutList.svelte";
     import AddWorkoutButton from "./AddWorkoutButton.svelte";
-    import AddWorkoutPlanButtonS from "./AddWorkoutPlanButton.svelte";
-	import AddWorkoutPlanButton from "./AddWorkoutPlanButton.svelte";
-
-    // let img:string = '/DefaultPics/ProfilePicture.jpg';
+	  import AddWorkoutPlanButton from "./AddWorkoutPlanButton.svelte";
 </script>
 
 <style>
