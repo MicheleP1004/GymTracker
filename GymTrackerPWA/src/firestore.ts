@@ -1,22 +1,8 @@
-// import { db } from './firebase';
-import {  initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, setDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, setDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { DocumentData, QuerySnapshot } from 'firebase/firestore'; //importazione di tipo
+import { db,storage} from './firebase';
 
 import type { Utente } from './globalState.svelte';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAHu55oxRvlmFuuRkVfcM4JeF8TvIqlhg0",
-  authDomain: "gymtrackerpwa.firebaseapp.com",
-  projectId: "gymtrackerpwa",
-  storageBucket: "gymtrackerpwa.appspot.com",
-  messagingSenderId: "1046461599327",
-  appId: "1:1046461599327:web:a5e22aa12f42ae252515ea",
-  measurementId: "G-K6QV8KPFH2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 //aggiunge un nuovo documento
 export async function addData(collectionName: string, data: object): Promise<void> {
@@ -33,11 +19,39 @@ export async function getData(collectionName: string): Promise<DocumentData[]> {
   return querySnapshot.docs.map(doc => doc.data());
 }
 
-//inizializza un nuovo utente
-export async function addUser(name:string, bio:string, id:string,email:string):Promise<void>{
+
+import { ref, uploadBytes, getDownloadURL, type UploadResult } from "firebase/storage";
+
+export async function addUser(
+  username: string, 
+  bio: string, 
+  id: string, 
+  email: string, 
+  file: File | null | string
+): Promise<void> {
   try {
-    await setDoc(doc(db, "users", id), { name, bio, email,friends: [], workouts: [], plans: []});
+    let propicUrl:string | null = null;
+
+    if (file) {
+      if (file instanceof File){
+        propicUrl = await uploadImage(file);
+      }else{
+        propicUrl = file;
+      }
+    }
+
+    await setDoc(doc(db, "users", id), {
+      username,
+      bio,
+      email,
+      propic: propicUrl,
+      friends: [],
+      workouts: [],
+      plans: []
+    });
+
     console.log('Utente creato o aggiornato con successo!');
+
   } catch (e) {
     console.error('Errore creando utente: ', e);
   }
@@ -45,6 +59,7 @@ export async function addUser(name:string, bio:string, id:string,email:string):P
 
 export async function getUserData(id: string): Promise<Utente | null> {
   try {
+    // console.log(id);
     const userDoc = await getDoc(doc(db, 'users', id));
 
     if (userDoc.exists()) {
@@ -58,7 +73,8 @@ export async function getUserData(id: string): Promise<Utente | null> {
         bio: data.bio,
         friends: data.friends || [],
         workouts: data.workouts || [],
-        plans: data.plans || []
+        plans: data.plans || [],
+        propic: data.propic
       } as Utente;
     } else {
       console.log('Documento utente non trovato.');
@@ -70,7 +86,25 @@ export async function getUserData(id: string): Promise<Utente | null> {
   }
 }
 
-export async function updateUtente(u:Utente):Promise<void>{
-  const docRef = doc(db,"users",u.uid);
-  await updateDoc(docRef,u);
+// export async function updateUtente(u:Utente):Promise<void>{
+//   const docRef = doc(db,"users",u.uid);
+//   await updateDoc(docRef,u);
+// }
+
+async function uploadImage(file:File): Promise<string> {
+  //crea un riferimento al file su Firebase Storage
+  const storageRef = ref(storage, 'images/' + file.name);
+
+  try {
+    const snapshot: UploadResult = await uploadBytes(storageRef, file);
+
+    const downloadURL: string = await getDownloadURL(snapshot.ref);
+
+    console.log('Immagine caricata con successo:', downloadURL);
+
+    return downloadURL;
+  } catch (error) {
+    console.error('Errore durante il caricamento dell\'immagine:', error);
+    return "error";
+  }
 }

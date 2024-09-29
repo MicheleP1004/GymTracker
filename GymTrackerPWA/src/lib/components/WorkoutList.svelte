@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import WorkoutButton from './WorkoutButton.svelte';
+    import * as state from '../../globalState.svelte';
   
     class Workout {
       date: string;
@@ -15,22 +16,24 @@
     }
   
     //array di prova
-    const state = $state({workouts:[] as Workout[]});
+    // const state = $state({workouts:[] as Workout[]});
     // let Workouts2: Workout[] = [];
+
+    
   
-    function createWorkouts() {
-      const defaultDate = new Date().toLocaleDateString().toString();
-    // const defaultDate = "ciao";
-      let tempWorkouts:Workout[] = [];
-      for (let i = 0; i < 15; i++) {
-        tempWorkouts.push(new Workout(defaultDate,`Piano: ${i + 1}`,i));
-      }
-      state.workouts = tempWorkouts;
-    }
+    // function createWorkouts() {
+    //   const defaultDate = new Date().toLocaleDateString().toString();
+    // // const defaultDate = "ciao";
+    //   let tempWorkouts:Workout[] = [];
+    //   for (let i = 0; i < 15; i++) {
+    //     tempWorkouts.push(new Workout(defaultDate,`Piano: ${i + 1}`,i));
+    //   }
+    //   state.workouts = tempWorkouts;
+    // }
     
     //popolo l'array dopo la creazione del DOM 
     onMount(() => {
-      createWorkouts();
+      // createWorkouts();
     });
 </script>
 
@@ -48,11 +51,17 @@
     box-sizing: border-box;
     scrollbar-width: none;
   }
-
+  .text{
+    padding: 10px;
+    align-self: center;
+    color: gray;
+    font-family: Arial, Helvetica, sans-serif;
+  }
 </style>
 
 <div class="workout-list">
-    {#each state.workouts as Workout (Workout.id)}
+    {#each state.stato.workouts as Workout (Workout.id)}
         <WorkoutButton date={Workout.date} plan={Workout.plan} />
     {/each}
+    <p class="text">Non sono presenti altri allenamenti</p>
 </div>

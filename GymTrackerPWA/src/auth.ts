@@ -5,9 +5,10 @@ import type { UserCredential } from 'firebase/auth'; //importazione di tipo
 import * as store from './firestore';
 
 //funzione per registrare un nuovo utente
-export async function registerUser(email: string, password: string, name:string, bio:string): Promise<UserCredential> {
+export async function registerUser(email: string, password: string, name:string, bio:string,file:File | null): Promise<UserCredential> {
   const cred = createUserWithEmailAndPassword(auth, email, password);
-  store.addUser(name, bio, (await cred).user.uid, email);
+  // store.addUser(name, bio, (await cred).user.uid, email);
+  store.addUser(name, bio, (await cred).user.uid, email,file);
   return cred;
 }
 
@@ -27,10 +28,13 @@ export async function loginWithGoogle(): Promise<UserCredential | null> {
   try {
     const result = await signInWithPopup(auth, provider);
     let data = await store.getUserData(result.user.uid);
-    if(data == null && result.user.email != null){
-      store.addUser(result.user.email.slice(0,result.user.email.search("@")),"",result.user.uid,result.user.email);
-    }else{
-      throw new Error("Errore durante login con Google");
+    if(data == null){
+      if(result.user.email != null){
+        // store.addUser(result.user.email.slice(0,result.user.email.search("@")),"",result.user.uid,result.user.email);
+        store.addUser(result.user.email.slice(0,result.user.email.search("@")),"",result.user.uid,result.user.email,result.user.photoURL);
+      }else{
+        throw new Error("Errore durante login con Google");
+      }
     }
     return result;
   } catch (error) {

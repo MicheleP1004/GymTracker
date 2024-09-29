@@ -44,11 +44,17 @@
     box-sizing: border-box;
     scrollbar-width: none;
   }
-
+  .text{
+    padding: 10px;
+    align-self: center;
+    color: gray;
+    font-family: Arial, Helvetica, sans-serif;
+  }
 </style>
 
 <div class="chat-list">
     {#each state.chats as chat (chat.name)}
         <ChatButton propic={chat.propic} chatName={chat.name} />
     {/each}
+    <p class="text">Non sono presenti altre chat</p>
 </div>

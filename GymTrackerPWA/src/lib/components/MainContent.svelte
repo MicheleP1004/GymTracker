@@ -38,10 +38,8 @@
     <MainTop></MainTop>
     <div class="main-body">
       <div class="main-body-upper">
-        <!-- <h1>bottone allenamento</h1> -->
-         <AddWorkoutButton></AddWorkoutButton>
-        <!-- <h1>bottone piano</h1> -->
-         <AddWorkoutPlanButton></AddWorkoutPlanButton>
+        <AddWorkoutButton></AddWorkoutButton>
+        <AddWorkoutPlanButton></AddWorkoutPlanButton>
       </div>
       <WorkoutList></WorkoutList>
     </div>

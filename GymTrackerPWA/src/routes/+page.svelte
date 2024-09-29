@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import { loginUser, logoutUser, registerUser, loginWithGoogle } from '../auth'; 
   import { auth } from '../firebase';
-  import { onAuthStateChanged } from 'firebase/auth';
-  import type { User } from 'firebase/auth';
-  import type { UserCredential } from 'firebase/auth'; 
+  import { onAuthStateChanged} from 'firebase/auth';
+  import type { User,UserCredential } from 'firebase/auth';
+
   import type {Utente} from '../globalState.svelte';
 
   import ChatList from '../lib/components/ChatList.svelte';
@@ -12,12 +12,8 @@
   import ResearchBar from '../lib/components/ResearchBar.svelte';
 
   import * as db from '../firestore';
-  // import {stato} from '../globalState.svelte';
-  import * as stato from '../globalState.svelte';
+  import {setUtente} from '../globalState.svelte';
 
-  let utente = stato.getUtente();
-
-  // export const stato = creaUtente();
 
   let user: User | null = null;
   let email: string = '';
@@ -29,16 +25,30 @@
   let registerPassword: string = '';
   let registerError: string | null = null;
   let registerName: string = '';
-  let registerBio: string = '';
+  let registerBio: string = ''; 
 
   let userCred:UserCredential| null = null;
 
   //monitorare lo stato di autenticazione
   onMount(() => {
     onAuthStateChanged(auth, (currentUser) => {
-      user = currentUser;
+      if(currentUser && !user){
+        user = currentUser;
+        setter(user.uid);
+      }
+      // console.log(user?.uid);
+      // if(user){
+      //   setter(user.uid);
+      // }
     });
   });
+
+  async function setter(id:string){
+    let data: Utente | null = await(db.getUserData(id));
+      if(data != null){
+        setUtente(data);
+      }
+  }
 
   //funzione per il login con email e password
   async function handleLogin() {
@@ -48,10 +58,9 @@
 
       if(userCred != null){
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
-        if(data != null)
-          // stato.utente = data;
-          // stato.setUtente(data);
-          utente.email = "prova";
+        if(data != null){
+          setUtente(data);
+        }
       }
 
     } catch (err) {
@@ -68,7 +77,7 @@
     try {
       await logoutUser();   //logout
       user = null;
-      stato.setUtente({
+      setUtente({
         uid: '',
         email: '',
         username: '',
@@ -76,7 +85,8 @@
         friends: [],
         workouts: [],
         plans: [],
-      })
+        propic: "/DefaultPics/ProfilePicture.jpg"
+      });
     } catch (err) {
       if (err instanceof Error) {
         error = 'Errore durante il logout: ' + err.message;
@@ -95,8 +105,7 @@
       if(userCred != null){
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
         if(data != null)
-          // stato.utente = data;
-          stato.setUtente(data);
+          setUtente(data);
       }
 
     } catch (err) {
@@ -123,17 +132,16 @@
       registerBio = "";
     }
 
-    console.log(registerName+" "+registerEmail);
     try {
-      userCred = await registerUser(registerEmail, registerPassword, registerName, registerBio);
+      userCred = await registerUser(registerEmail, registerPassword, registerName, registerBio,file);
       registerError = null;
       showRegisterForm = false; //nasconde il form dopo la registrazione
 
       if(userCred != null){
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
-        if(data != null)
-          // stato.utente = data;
-          stato.setUtente(data);
+        if(data != null){
+          setUtente(data);
+          }
       }
 
     } catch (err) {
@@ -144,6 +152,41 @@
       }
     }
   }
+
+  //variabili per drag and drop
+  let file:File | null = null;
+  let isDragging: boolean = false;
+  let errorMessage: string = '';
+
+  //gestione drag and drop per immagine profilo
+  const handleDrop = (event:DragEvent) => {
+    event.preventDefault();
+    isDragging = false;
+    errorMessage = ''; 
+    
+    if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+      const droppedFile = event.dataTransfer.files[0];
+      console.log('File trascinato:', droppedFile);
+
+      if (droppedFile.type.startsWith("image/")) {
+        file = droppedFile;
+        console.log('File immagine accettato:', file);
+      } else {
+        file = null;
+        errorMessage = 'Solo file di immagine sono accettati!';
+        console.error(errorMessage);
+      }
+    }
+  };
+
+  const handleDragOver = (event:DragEvent) => {
+    event.preventDefault(); 
+    isDragging = true; 
+  };
+
+  const handleDragLeave = () => {
+    isDragging = false; 
+  };
 </script>
 
 <style>
@@ -210,9 +253,12 @@
     font-family: Arial, Helvetica, sans-serif;
     font-weight: 500;
   }
+  .is-dragging {
+    border-color: rgb(0, 0, 0);
+    background-color: #f0f0f0;
+  }
 </style>
 
-<h1>{stato.getUtente().email}</h1>
 {#if user}
   <div class="top-bar">
     <h1 class="text">GymTracker</h1>
@@ -244,7 +290,6 @@
 
     <!-- form di registrazione  -->
     {#if showRegisterForm}
-      <!-- <div class="login-container"> -->
         <h2 class="text">Registrazione:</h2>
         <input class="input-field" type="email" bind:value={registerEmail} placeholder="Email" />
         <input class="input-field" type="password" bind:value={registerPassword} placeholder="Password" />
@@ -253,8 +298,23 @@
         {#if registerError}
           <p class="error-message">{registerError}</p>
         {/if}
+        <div role = "button" tabindex="0"
+        class:is-dragging={isDragging}
+        ondragover={handleDragOver}
+        ondragleave={handleDragLeave}
+        ondrop={handleDrop}
+        style="border: 2px dashed #ccc; width: 300px; height: 200px; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;">
+        {#if file}
+          <p>{file.name}</p>
+        {:else}
+          <p class="text">Trascina qui il file immagine</p>
+        {/if}
+      </div>
+      {#if errorMessage}
+      <p style="color: red;">{errorMessage}</p>
+      {/if}
+
         <button class="auth-button" onclick={handleRegister}>Crea Account</button>
-      <!-- </div> -->
     {/if}
 
   </div>
