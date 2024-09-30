@@ -1,40 +1,6 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import WorkoutButton from './WorkoutButton.svelte';
-    import * as state from '../../globalState.svelte';
-  
-    class Workout {
-      date: string;
-      plan: string;
-      id:number;
-  
-      constructor(date: string, plan: string, id:number) {
-        this.date = date;
-        this.plan = plan;
-        this.id = id;
-      }
-    }
-  
-    //array di prova
-    // const state = $state({workouts:[] as Workout[]});
-    // let Workouts2: Workout[] = [];
-
-    
-  
-    // function createWorkouts() {
-    //   const defaultDate = new Date().toLocaleDateString().toString();
-    // // const defaultDate = "ciao";
-    //   let tempWorkouts:Workout[] = [];
-    //   for (let i = 0; i < 15; i++) {
-    //     tempWorkouts.push(new Workout(defaultDate,`Piano: ${i + 1}`,i));
-    //   }
-    //   state.workouts = tempWorkouts;
-    // }
-    
-    //popolo l'array dopo la creazione del DOM 
-    onMount(() => {
-      // createWorkouts();
-    });
+    import {stato} from '../../globalState.svelte';
 </script>
 
 <style>
@@ -60,8 +26,8 @@
 </style>
 
 <div class="workout-list">
-    {#each state.stato.workouts as Workout (Workout.id)}
-        <WorkoutButton date={Workout.date} plan={Workout.plan} />
+    {#each stato.workouts as a}
+        <WorkoutButton date={a.date} plan={a.plan} />
     {/each}
     <p class="text">Non sono presenti altri allenamenti</p>
 </div>

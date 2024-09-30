@@ -3,8 +3,6 @@
 
     let {date, plan}: {date:string, plan:string} = $props();
 
-    // import Chat from './Chat.svelte';
-    //flag per il caricamento della chat
     let detailsVisibility:boolean = $state(false);
     let listData: string = plan+" Registrato in data:"+date; 
 

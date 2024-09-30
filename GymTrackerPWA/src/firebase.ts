@@ -4,15 +4,17 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
+import * as env from '$env/static/public';
+
 //oggetto di configurazione
 const firebaseConfig = {
-    apiKey: "AIzaSyAHu55oxRvlmFuuRkVfcM4JeF8TvIqlhg0",
-    authDomain: "gymtrackerpwa.firebaseapp.com",
-    projectId: "gymtrackerpwa",
-    storageBucket: "gymtrackerpwa.appspot.com",
-    messagingSenderId: "1046461599327",
-    appId: "1:1046461599327:web:a5e22aa12f42ae252515ea",
-    measurementId: "G-K6QV8KPFH2"
+    apiKey: env.PUBLIC_API_KEY,
+    authDomain: env.PUBLIC_AUTH_DOMAIN,
+    projectId: env.PUBLIC_PROJECT_ID,
+    storageBucket: env.PUBLIC_STORAGE_BUCKET,
+    messagingSenderId: env.PUBLIC_MESSAGE_SENDER,
+    appId: env.PUBLIC_APP_ID,
+    measurementId: env.PUBLIC_MEASUREMENT_ID
   };
 
 //inizializza Firebase

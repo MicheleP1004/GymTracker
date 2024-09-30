@@ -1,5 +1,7 @@
 <script  lang="ts">
     import {createEventDispatcher} from 'svelte';
+	import PlannerPanel from './PlannerPanel.svelte';
+    
     const dispatch = createEventDispatcher();
     
       //flag di visibilità
@@ -10,7 +12,6 @@
         //comunica evento di chiusura al padre
         dispatch('planner-closed',{text: "planner closed"});
       }
-  
   </script>
   
   <style>
@@ -67,5 +68,6 @@
         <div class="exit-button" onclick={close} onkeyup={close} role="button" tabindex= 0>
           <img class="center" src="/DefaultPics/XIcon.png" alt="">
         </div>
+          <PlannerPanel></PlannerPanel>
       </div>
     {/if}

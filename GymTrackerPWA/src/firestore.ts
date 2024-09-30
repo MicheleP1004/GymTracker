@@ -1,8 +1,9 @@
-import { collection, addDoc, getDocs, setDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, addDoc, getDocs, setDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { DocumentData, QuerySnapshot } from 'firebase/firestore'; //importazione di tipo
 import { db,storage} from './firebase';
 
 import type { Utente } from './globalState.svelte';
+import type { Esercizio } from './globalState.svelte';
 
 //aggiunge un nuovo documento
 export async function addData(collectionName: string, data: object): Promise<void> {
@@ -67,7 +68,7 @@ export async function getUserData(id: string): Promise<Utente | null> {
 
       //restituisce i dati convertiti nel formato Utente
       return {
-        uid: data.uid,
+        uid: id,
         email: data.email,
         username: data.username,
         bio: data.bio,
@@ -106,5 +107,24 @@ async function uploadImage(file:File): Promise<string> {
   } catch (error) {
     console.error('Errore durante il caricamento dell\'immagine:', error);
     return "error";
+  }
+}
+
+export async function getExcercises(id:string): Promise<Esercizio[] | null> {
+  try {
+    const q = query(collection(db,'excercises'),where("owner","==",id));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.size != 0) {
+      let es:Esercizio[]=[];
+      querySnapshot.forEach((doc)=>{
+        es.push(doc.data() as Esercizio);
+      });
+      return es;
+    }
+    return null;
+  } catch (e) {
+    console.error('Errore recuperando i dati dell\'utente: ', e);
+    return null;
   }
 }
