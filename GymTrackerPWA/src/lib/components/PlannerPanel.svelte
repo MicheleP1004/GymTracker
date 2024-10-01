@@ -1,12 +1,13 @@
 <script lang="ts">
-    import {Esercizio} from '../../globalState.svelte';
+    import {Esercizio,Scheda} from '../../data.svelte';
+    import {esercizi,schede} from '../../data.svelte';
+    import {fetchEsercizi,fetchSchede} from '../../data.svelte'
+
+    import {setScheda,setEsercizio,delScheda,delEsercizio} from '../../data.svelte';
     import { stato } from '../../globalState.svelte';
-    import {getExcercises} from '../../firestore';
 	import Loading from './Loading.svelte';
 	import { onMount } from 'svelte';
-    import type {tipo} from '../../globalState.svelte';
-
-    let esercizi:Esercizio[] | null = $state([]);
+    import type {tipo} from '../../data.svelte';
 
     //flag
     let loading:boolean = $state(true);
@@ -15,56 +16,41 @@
     let delEs:boolean = $state(false);
     let delPlan:boolean = $state(false);
 
-    //contatori
-
-
     //variabili di appoggio
-    let exs:Esercizio[] = $state([new Esercizio(stato.uid,'','','strength')]);
-    let selezionati:Esercizio[] = $state([]);
+    let selezionatiE:Esercizio[] = $state([]);
+    let selezionatiS:Scheda[] = $state([]);
     
-   
-
     let nomeEs:string = $state('');
     let descrizione:string = $state('');
     let tipologia:tipo = $state(null);
 
+    let nomeScheda:string = $state('');
+    let descrizioneScheda:string = $state('');
+    let eserciziScheda:{ides:string,serie?:number}[] = $state([{ides:''}]);
+    let exs:Esercizio[] = $state([new Esercizio(stato.uid,'','',null)]);
+
+
 
     onMount(()=>{
-        fetchEsercizi();
-        // console.log(esercizi![0]);
+        fetchEsercizi(stato.uid);
+        fetchSchede(stato.uid);
         loading= false;
     })
-
-    async function fetchEsercizi():Promise<void> {
-        try{
-            let es:Esercizio[]|null = await getExcercises(stato.uid);
-            if(!es){
-                esercizi = [];
-            }else{
-                esercizi=es;
-            }
-        }catch(e){
-            console.log(e);
-        }
-    }
 
     function resetMakePlan():void{
         exs = [new Esercizio(stato.uid,'','',null)];
         makePlan = false;
     }
     function resetDelPlan():void{
-        // exs = [new Esercizio('',stato.uid,'','','strength')];
         delPlan = false;
     }
     function resetMakeEs():void{
-        // exs = [new Esercizio('',stato.uid,'','','strength')];
         nomeEs='';
         descrizione='';
         tipologia=null;
         makeEs = false;
     }
     function resetDelEs():void{
-        // exs = [new Esercizio('',stato.uid,'','','strength')];
         delEs = false;
     }
 
@@ -79,40 +65,105 @@
             return;
         }
 
-        if(!esercizi){
-            esercizi = [new Esercizio(stato.uid,nomeEs,descrizione,tipologia)];
-        }else{
-            esercizi.push(new Esercizio(stato.uid,nomeEs,descrizione,tipologia));
+        if(contains(esercizi,nomeEs)){
+            alert("Un esercizio con lo stesso nome esiste già.");
+            return;
         }
+
+        //modifica dati
+        setEsercizio(new Esercizio(stato.uid,nomeEs,descrizione,tipologia));
+
         nomeEs='';
         descrizione='';
         tipologia=null;
         makeEs = false;
     }
 
-    function toggleSelezione(e:Esercizio){
-        if(selezionati.includes(e)){
-            selezionati = selezionati.filter(el => el !== e);
+    function applyMakePlan():void{
+        if (nomeScheda == '') {
+            alert("Il campo 'Nome' è obbligatorio.");
+            return;
+        }
+
+        if (eserciziScheda?.length == 0) {
+            alert("Selezionare un esercizio");
+            return;
+        }
+
+        if(contains(schede,nomeScheda)){
+            alert("Una scheda con lo stesso nome esiste già.");
+            return;
+        }
+        for(let i=0;i<exs.length;i++){
+            eserciziScheda[i].ides = exs[i].name;
+        }
+
+        for (let i = exs.length - 1; i >= 0; i--) {
+            if (eserciziScheda[i].ides === '') {
+                removeExercise(i);
+            }
+        }
+
+        //modifica dati
+        setScheda(new Scheda(stato.uid,nomeScheda,descrizioneScheda,eserciziScheda));
+
+        nomeScheda='';
+        descrizioneScheda='';
+        eserciziScheda = [{ides:''}];
+        exs=[new Esercizio(stato.uid,'','',null)];
+        makePlan = false;
+    }
+
+    function contains(list:Esercizio[]|Scheda[],nome:string): boolean {
+        return list.some((item) => item.name === nome);
+    }
+
+    function toggleSelezioneE(e:Esercizio){
+        if(selezionatiE.includes(e)){
+            selezionatiE = selezionatiE.filter(el => el !== e);
         }else{
-            selezionati.push(e);
+            selezionatiE.push(e);
+        }
+    }
+
+    function toggleSelezioneS(s:Scheda){
+        if(selezionatiS.includes(s)){
+            selezionatiS = selezionatiS.filter(el => el !== s);
+        }else{
+            selezionatiS.push(s);
         }
     }
 
     function applyDelEs(){
-        esercizi = esercizi!.filter(item => !selezionati.includes(item));
+        //modifica dati
+        for(let e of selezionatiE)
+            delEsercizio(e);
 
         delEs=false;
-        selezionati=[];
+        selezionatiE=[];
+    }
+
+    function applyDelPlan(){
+        //modifica dati
+        for(let s of selezionatiS)
+            delScheda(s);
+
+        delPlan=false;
+        selezionatiS=[];
+    }
+
+    function removeExercise(index:number):void{
+        exs.splice(index, 1);
+        eserciziScheda.splice(index, 1);
     }
 </script>
 
-<!-- svelte-ignore non_reactive_update -->
 <style>
     .form{
         box-sizing: border-box;
-        /* align-items: center; */
         place-items: center;
         width: 100%;
+        height : 100%;
         grid-template-rows: 95% 5%;
     }
     .grid{
@@ -163,20 +214,59 @@
         {#if makePlan || delPlan}
             <div class="form">
                 {#if makePlan}
-                    {#each exs as e}
-                        <p>{e.owner}</p>
-                    {/each}
+
+                    <form class="left">
+                        <label for="name">Nome:</label><br>
+                        <input type="text" id="name" name="name" required bind:value={nomeScheda}><br><br>
+
+                        <label for="descrizione">Descrizione:</label><br>
+                        <input type="text" id="descrizione" name="descrizione" bind:value={descrizioneScheda}><br><br>
+                        {#each exs as e,index}
+                            <label for="selection">Scegli l'esercizio:</label>
+
+                            <select bind:value={exs[index]} id="selection" name="selection">
+                                {#each esercizi as es}
+                                    <option value={es}>{es.name}</option>
+                                {/each}
+                            </select><br><br>
+                            
+                            {#if (e.tipo=="strength")}
+                                {(() => { eserciziScheda[index] = { ides: '', serie: 1 }; })()}
+                                <label for="numberInput">Inserisci il numero di serie:</label>
+                                <input type="number" id="numberInput" bind:value={eserciziScheda[index].serie} min=1/><br>
+                            {/if}
+
+                            <button type="button" onclick={() => removeExercise(index)}>Rimuovi esercizio</button><br><br>
+                        {/each}
+                    </form>
+
                     <div class="inner-grid">
                         <button class="button" onclick={resetMakePlan}>Annulla</button>
-                        <button class="button" onclick={()=>{exs.push(new Esercizio(stato.uid,'','',null))}}>Aggiungi esercizio</button>
-                        <button class="button" onclick={resetMakePlan}>Conferma</button>
+                        <button class="button" onclick={()=>{
+                            exs.push(new Esercizio(stato.uid,'','',null));
+                            eserciziScheda.push({ides:''});
+                            }}>Aggiungi esercizio</button>
+                        <button class="button" onclick={applyMakePlan}>Conferma</button>
                     </div>
                 {:else}
-                    <p>cancellazione da fare</p>
+                    {#if schede.length == 0}
+                        <p class="text">Non hai schede registrate</p>
+                    {:else}
+                    <form class="left">
+                        {#each schede as s}
+                        <label>
+                            <input 
+                            type="checkbox" 
+                            onchange={() => toggleSelezioneS(s)}>
+                            {s.name}
+                        </label><br>
+                        {/each}
+                    </form>
+                    {/if}
                     <div class="inner-grid">
                         <button class="button" onclick={resetDelPlan}>Annulla</button>
                         <p></p>
-                        <button class="button" onclick={resetDelPlan}>Conferma</button>
+                        <button class="button" onclick={applyDelPlan}>Conferma</button>
                     </div>
                 {/if}
             </div>
@@ -211,15 +301,15 @@
                         <button class="button" onclick={applyMakeEs}>Conferma</button>
                     </div>
                 {:else}
-                    {#if esercizi!.length == 0}
+                    {#if esercizi.length == 0}
                         <p class="text">Non hai esercizi registrati</p>
                     {:else}
                     <form class="left">
-                        {#each esercizi! as e}
+                        {#each esercizi as e}
                         <label>
                             <input 
                               type="checkbox" 
-                              onchange={() => toggleSelezione(e)}>
+                              onchange={() => toggleSelezioneE(e)}>
                             {e.name}
                           </label><br>
                         {/each}

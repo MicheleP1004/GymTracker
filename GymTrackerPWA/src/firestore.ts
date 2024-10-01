@@ -3,7 +3,8 @@ import type { DocumentData, QuerySnapshot } from 'firebase/firestore'; //importa
 import { db,storage} from './firebase';
 
 import type { Utente } from './globalState.svelte';
-import type { Esercizio } from './globalState.svelte';
+// import type { Esercizio,Scheda } from './globalState.svelte';
+import type { Esercizio,Scheda } from './data.svelte';
 
 //aggiunge un nuovo documento
 export async function addData(collectionName: string, data: object): Promise<void> {
@@ -119,6 +120,25 @@ export async function getExcercises(id:string): Promise<Esercizio[] | null> {
       let es:Esercizio[]=[];
       querySnapshot.forEach((doc)=>{
         es.push(doc.data() as Esercizio);
+      });
+      return es;
+    }
+    return null;
+  } catch (e) {
+    console.error('Errore recuperando i dati dell\'utente: ', e);
+    return null;
+  }
+}
+
+export async function getSchede(id:string): Promise<Scheda[] | null> {
+  try {
+    const q = query(collection(db,'schede'),where("owner","==",id));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.size != 0) {
+      let es:Scheda[]=[];
+      querySnapshot.forEach((doc)=>{
+        es.push(doc.data() as Scheda);
       });
       return es;
     }

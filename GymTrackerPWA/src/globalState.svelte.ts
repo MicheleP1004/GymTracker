@@ -51,28 +51,6 @@ export class Friend{
     propic: string = $state('');
 }
 
-//classi per gestione allenamenti
-export type tipo = 'cardio'|'flex'|'strength'|null;
-
-export class Esercizio{
-    owner:string;
-    name:string;
-    descrizione : string;
-    tipo: tipo;
-
-    constructor(
-        owner:string,
-        name:string,
-        descrizione : string,
-        tipo: tipo,){
-            this.owner = owner;
-            this.name = name;
-            this.descrizione = descrizione;
-            this.tipo = tipo;
-        }
-        
-}
-
 export class Plan{
     name:string = $state('');
     descrizione : string = $state('');
@@ -95,4 +73,45 @@ export function addAllenamento(a:Allenamento){
 
 
 export const stato = new Utente();
+
+//classi per gestione allenamenti
+export type tipo = 'cardio'|'flex'|'strength'|null;
+
+export class Esercizio{
+    owner:string;
+    name:string;
+    descrizione : string;
+    tipo: tipo;
+
+    constructor(
+        owner:string,
+        name:string,
+        descrizione : string,
+        tipo: tipo,){
+            this.owner = owner;
+            this.name = name;
+            this.descrizione = descrizione;
+            this.tipo = tipo;
+        }
+        
+}
+
+export class Scheda{
+    owner:string;
+    name:string;
+    descrizione : string;
+    esercizi: {ides:string,serie?:number}[];
+    
+    constructor(
+        owner:string,
+        name:string,
+        descrizione : string,
+        esercizi: {ides:string,serie?:number}[]
+    ){
+        this.owner = owner;
+        this.name = name;
+        this.descrizione = descrizione;
+        this.esercizi = esercizi;
+    }
+}
 
