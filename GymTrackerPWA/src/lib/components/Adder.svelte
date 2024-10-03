@@ -1,15 +1,16 @@
 <script  lang="ts">
-    import {createEventDispatcher} from 'svelte';
-    const dispatch = createEventDispatcher();
-    
-      //flag di visibilità
-      let {visibility}: {visibility:boolean} = $props();
+  import {createEventDispatcher} from 'svelte';
+	import AdderPanel from './AdderPanel.svelte';
+  const dispatch = createEventDispatcher();
   
-      function close():void{
-        visibility=false;
-        //comunica evento di chiusura al padre
-        dispatch('adder-closed',{text: "adder closed"});
-      }
+    //flag di visibilità
+    let {visibility}: {visibility:boolean} = $props();
+
+    function close():void{
+      visibility=false;
+      //comunica evento di chiusura al padre
+      dispatch('adder-closed',{text: "adder closed"});
+    }
   
   </script>
   
@@ -67,5 +68,6 @@
         <div class="exit-button" onclick={close} onkeyup={close} role="button" tabindex= 0>
           <img class="center" src="/DefaultPics/XIcon.png" alt="">
         </div>
+        <AdderPanel></AdderPanel>
       </div>
     {/if}

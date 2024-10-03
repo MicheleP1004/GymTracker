@@ -27,7 +27,7 @@
 
 <div class="workout-list">
     {#each stato.workouts as a}
-        <WorkoutButton date={a.date} plan={a.plan} />
+        <WorkoutButton date={a.date} plan={a.plan}/>
     {/each}
     <p class="text">Non sono presenti altri allenamenti</p>
 </div>

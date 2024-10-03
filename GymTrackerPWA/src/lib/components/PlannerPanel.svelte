@@ -8,6 +8,7 @@
 	import Loading from './Loading.svelte';
 	import { onMount } from 'svelte';
     import type {tipo} from '../../data.svelte';
+    import {flags} from "../../data.svelte";
 
     //flag
     let loading:boolean = $state(true);
@@ -31,10 +32,11 @@
 
 
 
-    onMount(()=>{
-        fetchEsercizi(stato.uid);
+    $effect(()=>{
         fetchSchede(stato.uid);
-        loading= false;
+        fetchEsercizi(stato.uid);
+
+        loading = !(flags.fetchE&&flags.fetchS);
     })
 
     function resetMakePlan():void{
@@ -73,10 +75,7 @@
         //modifica dati
         setEsercizio(new Esercizio(stato.uid,nomeEs,descrizione,tipologia));
 
-        nomeEs='';
-        descrizione='';
-        tipologia=null;
-        makeEs = false;
+        resetMakeEs();
     }
 
     function applyMakePlan():void{

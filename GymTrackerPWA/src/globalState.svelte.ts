@@ -53,65 +53,36 @@ export class Friend{
 
 export class Plan{
     name:string = $state('');
-    descrizione : string = $state('');
 }
 
 export class Allenamento{
-    date: string = $state(new Date().toString());
+    date: string = $state(new Date().toISOString().substring(0, 10));
     plan: string = $state('');
-    // ex: {es:Esercizio,pesi:number[]}[] = $state([]); 
 }
 
-export function setAllenamenti(a:Allenamento[]){
-    stato.workouts = a;
+// export function setAllenamenti(a:Allenamento[]){
+//     stato.workouts = a;
+// }
+
+export function addAllenamento(piano:string,data:string){
+    stato.workouts.push({plan:piano,date:data}as Allenamento);
 }
 
-export function addAllenamento(a:Allenamento){
-    stato.workouts.push(a);
-    //aggiungere memorizzazione del nuovo allenamento su firestore
+export function addPlan(nome:string){
+    stato.plans.push({name:nome}as Plan);
 }
 
+export function removeAllenamento(piano:string,data:string){
+    stato.workouts = stato.workouts.filter(
+        (workout) => workout.plan !== piano && workout.date !== data
+    );
+}
+
+export function removePlan(nome:string){
+    stato.plans = stato.plans.filter(
+        (plan) => plan.name !== nome
+    );
+}
 
 export const stato = new Utente();
-
-//classi per gestione allenamenti
-export type tipo = 'cardio'|'flex'|'strength'|null;
-
-export class Esercizio{
-    owner:string;
-    name:string;
-    descrizione : string;
-    tipo: tipo;
-
-    constructor(
-        owner:string,
-        name:string,
-        descrizione : string,
-        tipo: tipo,){
-            this.owner = owner;
-            this.name = name;
-            this.descrizione = descrizione;
-            this.tipo = tipo;
-        }
-        
-}
-
-export class Scheda{
-    owner:string;
-    name:string;
-    descrizione : string;
-    esercizi: {ides:string,serie?:number}[];
-    
-    constructor(
-        owner:string,
-        name:string,
-        descrizione : string,
-        esercizi: {ides:string,serie?:number}[]
-    ){
-        this.owner = owner;
-        this.name = name;
-        this.descrizione = descrizione;
-        this.esercizi = esercizi;
-    }
-}
 

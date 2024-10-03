@@ -4,7 +4,7 @@
     let {date, plan}: {date:string, plan:string} = $props();
 
     let detailsVisibility:boolean = $state(false);
-    let listData: string = plan+" Registrato in data:"+date; 
+    let listData: string ="Scheda: "+plan+" Registrato in data:"+date; 
 
     function triggerDetails():void{
       detailsVisibility = !detailsVisibility;
@@ -46,6 +46,6 @@
   <!-- carico la chat solo se viene aperta -->
   {#if detailsVisibility}
   <!-- assegno handler evento chiusura chat -->
-    <WorkoutDetails visibility={detailsVisibility} on:details-closed={handleClosure}/>
+    <WorkoutDetails visibility={detailsVisibility} plan={plan} date={date} on:details-closed={handleClosure}/>
   {/if}
   

@@ -1,6 +1,6 @@
 <script  lang="ts">
     import {createEventDispatcher} from 'svelte';
-	import PlannerPanel from './PlannerPanel.svelte';
+	  import PlannerPanel from './PlannerPanel.svelte';
     
     const dispatch = createEventDispatcher();
     

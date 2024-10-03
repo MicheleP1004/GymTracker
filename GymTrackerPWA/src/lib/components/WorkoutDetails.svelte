@@ -1,16 +1,16 @@
 <script  lang="ts">
     import {createEventDispatcher} from 'svelte';
+    import Details from './Details.svelte';
     const dispatch = createEventDispatcher();
       // export let visibility:boolean;
       //flag di visibilità
-      let {visibility}: {visibility:boolean} = $props();
+      let {visibility,plan,date}: {visibility:boolean,plan:string,date:string} = $props();
   
       function close():void{
         visibility=false;
         //comunica evento di chiusura al padre
         dispatch('details-closed',{text: "details closed"});
       }
-  
   </script>
   
   <style>
@@ -67,5 +67,6 @@
         <div class="exit-button" onclick={close} onkeyup={close} role="button" tabindex= 0>
           <img class="center" src="/DefaultPics/XIcon.png" alt="">
         </div>
+        <Details plan={plan} date={date}></Details>
       </div>
     {/if}
