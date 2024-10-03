@@ -2,7 +2,6 @@
     import {createEventDispatcher} from 'svelte';
     import Details from './Details.svelte';
     const dispatch = createEventDispatcher();
-      // export let visibility:boolean;
       //flag di visibilità
       let {visibility,plan,date}: {visibility:boolean,plan:string,date:string} = $props();
   

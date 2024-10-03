@@ -1,12 +1,8 @@
-import { getExcercises,getSchede,getWorkouts,saveAllenamento,saveEsercizio,savePlan,deleteAllenamento,deleteEsercizio,deletePlan } from "./firestore";
+import { getExercises,getSchede,getWorkouts,saveAllenamento,saveEsercizio,savePlan,deleteAllenamento,deleteEsercizio,deletePlan } from "./firestore";
 import { addAllenamento,addPlan,removeAllenamento,removePlan,stato } from "./globalState.svelte"
 
 //classi per gestione allenamenti
 export type tipo = 'cardio'|'flex'|'strength'|null;
-
-// export var fetchE : boolean = $state(false);
-// export var fetchS : boolean = $state(false);
-// export var fetchW : boolean = $state(false);
 
 export class Flags{
     fetchE : boolean = $state(false);
@@ -135,7 +131,7 @@ export async function fetchEsercizi(uid:string):Promise<boolean> {
         return true
     }
     try{
-        let appo:Esercizio[]|null = await getExcercises(uid);
+        let appo:Esercizio[]|null = await getExercises(uid);
         if(appo){
             for(let e of appo){
                 esercizi.push(e);
@@ -202,4 +198,20 @@ export function getWorkout(date:string,plan:string):Workout | null{
     return workout || null;
 }
 
-// export function 
+export function getScheda(name:string):Scheda | null{
+    const scheda = schede.find(s => s.name === name);
+    return scheda || null;
+}
+
+export function getEsercizio(name:string):Esercizio | null{
+    const es = esercizi.find(e => e.name === name);
+    return es || null;
+}
+
+export function getEsercizi(names:string[]):(Esercizio | null)[]{
+    let array:(Esercizio | null)[] = [];
+    for(let n of names){
+        array.push(getEsercizio(n)||null);
+    }
+    return array || null;
+}

@@ -6,7 +6,6 @@
     import {setScheda,setEsercizio,delScheda,delEsercizio} from '../../data.svelte';
     import { stato } from '../../globalState.svelte';
 	import Loading from './Loading.svelte';
-	import { onMount } from 'svelte';
     import type {tipo} from '../../data.svelte';
     import {flags} from "../../data.svelte";
 

@@ -1,9 +1,7 @@
 import { collection, query, where, addDoc, getDocs, setDoc, doc, getDoc, updateDoc, arrayUnion, deleteDoc,arrayRemove } from 'firebase/firestore';
-import type { DocumentData, QuerySnapshot } from 'firebase/firestore'; //importazione di tipo
+import type { DocumentData, QuerySnapshot } from 'firebase/firestore';
 import { db,storage} from './firebase';
-// ,Allenamento,Plan 
 import type { Utente} from './globalState.svelte';
-// import type { Esercizio,Scheda } from './globalState.svelte';
 import type { Esercizio,Scheda,Workout } from './data.svelte';
 
 //aggiunge un nuovo documento
@@ -88,11 +86,6 @@ export async function getUserData(id: string): Promise<Utente | null> {
   }
 }
 
-// export async function updateUtente(u:Utente):Promise<void>{
-//   const docRef = doc(db,"users",u.uid);
-//   await updateDoc(docRef,u);
-// }
-
 async function uploadImage(file:File): Promise<string> {
   //crea un riferimento al file su Firebase Storage
   const storageRef = ref(storage, 'images/' + file.name);
@@ -111,9 +104,9 @@ async function uploadImage(file:File): Promise<string> {
   }
 }
 
-export async function getExcercises(id:string): Promise<Esercizio[] | null> {
+export async function getExercises(id:string): Promise<Esercizio[] | null> {
   try {
-    const q = query(collection(db,'excercises'),where("owner","==",id));
+    const q = query(collection(db,'exercises'),where("owner","==",id));
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.size != 0) {
@@ -171,15 +164,11 @@ export async function getWorkouts(id:string): Promise<Workout[] | null> {
 export async function saveAllenamento(workout: Workout): Promise<void> {
   try {
     const { owner, date, plan, sets } = workout;
-    // Add the workout to the "allenamenti" collection
     await addDoc(collection(db, "allenamenti"), { owner, date, plan, sets });
 
-    // Update the user's document by adding the workout to the "workouts" array
     const userDocRef = doc(db, "users", workout.owner);
     await updateDoc(userDocRef, {
       workouts: arrayUnion({
-        // store the reference to the workout document
-        // id: docRef.id, 
         date: workout.date,
         plan: workout.plan,
       })
@@ -194,15 +183,11 @@ export async function saveAllenamento(workout: Workout): Promise<void> {
 export async function savePlan(scheda: Scheda): Promise<void> {
   try {
     const {owner,name,descrizione,esercizi} = scheda;
-    // Add the plan to the "schede" collection
     await addDoc(collection(db, "schede"), {owner,name,descrizione,esercizi});
 
-    // Update the user's document by adding the plan to the "plans" array
     const userDocRef = doc(db, "users", scheda.owner);
     await updateDoc(userDocRef, {
       plans: arrayUnion({
-        // store the reference to the plan document
-        // id: docRef.id, 
         name: scheda.name
       })
     });
@@ -216,7 +201,7 @@ export async function savePlan(scheda: Scheda): Promise<void> {
 export async function saveEsercizio(esercizio: Esercizio): Promise<void> {
   try {
     const { owner, name, descrizione, tipo } = esercizio;
-    await addDoc(collection(db, "excercises"), { owner, name, descrizione, tipo });
+    await addDoc(collection(db, "exercises"), { owner, name, descrizione, tipo });
 
     console.log('Esercizio aggiunto con successo!');
   } catch (e) {
@@ -226,7 +211,6 @@ export async function saveEsercizio(esercizio: Esercizio): Promise<void> {
 
 export async function deleteAllenamento(owner: string, plan: string, date: string): Promise<void> {
   try {
-    // Query to find the correct document
     const q = query(
       collection(db, 'allenamenti'),
       where('owner', '==', owner),
@@ -236,23 +220,18 @@ export async function deleteAllenamento(owner: string, plan: string, date: strin
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      // Log the found documents
       querySnapshot.forEach((docSnapshot) => {
         console.log('Found Allenamento:', docSnapshot.data());
       });
 
-      // Deleting the document
       querySnapshot.forEach(async (docSnapshot) => {
         await deleteDoc(doc(db, 'allenamenti', docSnapshot.id));
       });
 
-      // Prepare the object to remove from the user's workouts array
-      const workoutToRemove = { date,plan }; // Ensure this matches the stored object structure
+      const workoutToRemove = { date,plan };
 
-      // Log the object we are attempting to remove
       console.log('Removing from workouts array:', workoutToRemove);
 
-      // Update user's workouts array
       const userDocRef = doc(db, 'users', owner);
       await updateDoc(userDocRef, {
         workouts: arrayRemove(workoutToRemove)
@@ -269,7 +248,6 @@ export async function deleteAllenamento(owner: string, plan: string, date: strin
 
 export async function deletePlan(owner: string, name: string): Promise<void> {
   try {
-    // Query to find the correct document
     const q = query(
       collection(db, 'schede'),
       where('owner', '==', owner),
@@ -278,23 +256,18 @@ export async function deletePlan(owner: string, name: string): Promise<void> {
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      // Log the found documents
       querySnapshot.forEach((docSnapshot) => {
         console.log('Found Plan:', docSnapshot.data());
       });
 
-      // Deleting the document
       querySnapshot.forEach(async (docSnapshot) => {
         await deleteDoc(doc(db, 'schede', docSnapshot.id));
       });
 
-      // Prepare the object to remove from the user's plans array
-      const planToRemove = { name }; // Only need the name for the removal
+      const planToRemove = { name };
 
-      // Log the object we are attempting to remove
       console.log('Removing from plans array:', planToRemove);
 
-      // Update user's plans array
       const userDocRef = doc(db, 'users', owner);
       await updateDoc(userDocRef, {
         plans: arrayRemove(planToRemove)
@@ -311,9 +284,8 @@ export async function deletePlan(owner: string, name: string): Promise<void> {
 
 export async function deleteEsercizio(owner: string, name: string): Promise<void> {
   try {
-    // Query to find the correct exercise document based on the owner and name
     const q = query(
-      collection(db, 'excercises'),
+      collection(db, 'exercises'),
       where('owner', '==', owner),
       where('name', '==', name)
     );
@@ -321,7 +293,6 @@ export async function deleteEsercizio(owner: string, name: string): Promise<void
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      // If a matching exercise is found, delete it
       const exerciseDoc = querySnapshot.docs[0];
       await deleteDoc(exerciseDoc.ref);
 

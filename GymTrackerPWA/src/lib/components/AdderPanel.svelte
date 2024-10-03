@@ -6,7 +6,6 @@
 
     import { stato } from '../../globalState.svelte';
 	import Loading from './Loading.svelte';
-	import { onMount } from 'svelte';
     import {flags} from "../../data.svelte";
 
     let loading:boolean=$state(true);
@@ -16,15 +15,7 @@
 
     let data:Date|null = $state(null);
     let plan: string = $state('');
-    // let sets: exSets[] = $state([]);
     let sets: exSets[] = [];
-
-    // onMount(()=>{
-    //     fetchWorkouts(stato.uid);
-    //     fetchSchede(stato.uid);
-    //     fetchEsercizi(stato.uid);
-    //     loading = false;
-    // })
 
     $effect(()=>{
         fetchSchede(stato.uid);
