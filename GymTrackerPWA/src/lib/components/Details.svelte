@@ -11,6 +11,7 @@
     let loading: boolean = $state(true);
     let deleted:boolean = $state(false);
     let error:boolean = $state(false);
+    let initialized:boolean = $state(false);
 
     let scheda:Scheda|null = null;
     let esercizi:(Esercizio|null)[] = [];
@@ -35,6 +36,9 @@
     }
 
     function initialize(){
+        if(initialized){
+            return;
+        }
         let appo:Workout| null = getWorkout(date,plan);
     
         if(appo){
@@ -53,6 +57,7 @@
             error = true;
         }
 
+        initialized=true;
     }
 </script>
 
@@ -111,7 +116,7 @@
         <Loading></Loading>
     {:else}
         {#if error}
-            <h3 class="text">Allenamento cancellato</h3>
+            <h3 class="text">Questo allenamento appartiene a una scheda cancellata o contiene esercizi cancellati</h3>
         {:else}
             {#if deleted}
                 <h3 class="text">Allenamento cancellato</h3>

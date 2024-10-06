@@ -213,12 +213,12 @@
         {#if registerError}
           <p class="error-message">{registerError}</p>
         {/if}
-        <div role = "button" tabindex="0"
-        class:is-dragging={isDragging}
-        ondragover={handleDragOver}
-        ondragleave={handleDragLeave}
-        ondrop={handleDrop}
-        style="border: 2px dashed #ccc; width: 300px; height: 200px; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;">
+          <div role = "button" tabindex="0"
+          class:is-dragging={isDragging}
+          ondragover={handleDragOver}
+          ondragleave={handleDragLeave}
+          ondrop={handleDrop}
+          style="border: 2px dashed #ccc; width: 300px; height: 200px; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;">
         {#if file}
           <p>{file.name}</p>
         {:else}

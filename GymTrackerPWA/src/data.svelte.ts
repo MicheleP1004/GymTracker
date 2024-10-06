@@ -130,9 +130,12 @@ export async function fetchEsercizi(uid:string):Promise<boolean> {
     if(flags.fetchE){
         return true
     }
+
     try{
         let appo:Esercizio[]|null = await getExercises(uid);
         if(appo){
+            //soluzione brutta
+            esercizi.splice(0,esercizi.length+1);
             for(let e of appo){
                 esercizi.push(e);
             }
@@ -153,6 +156,8 @@ export async function fetchSchede(uid:string):Promise<boolean> {
     try{
         let appo:Scheda[]|null = await getSchede(uid);
         if(appo){
+            //soluzione brutta
+            schede.splice(0,schede.length);
             for(let s of appo){
                 schede.push(s);
             }
@@ -173,6 +178,8 @@ export async function fetchWorkouts(uid:string):Promise<boolean> {
     try{
         let appo:Workout[]|null = await getWorkouts(uid);
         if(appo){
+            //soluzione brutta 
+            allenamenti.splice(0,allenamenti.length);
             for(let w of appo){
                 allenamenti.push(w);
             }
