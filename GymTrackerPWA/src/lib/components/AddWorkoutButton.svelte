@@ -1,5 +1,7 @@
 <script lang="ts">
-    import Adder from "./Adder.svelte";
+    // import Adder from "./Adder.svelte";
+    import Modal from "./Modal.svelte";
+    import AdderPanel from "./AdderPanel.svelte";
     const plusImg:string ="/DefaultPics/icons8-plus-50.png";
 
     let adderVisibility:boolean = $state(false);
@@ -36,5 +38,6 @@
 </div>
 
 {#if (adderVisibility)}
-    <Adder visibility={adderVisibility} on:adder-closed={handleClosure}></Adder>
+    <!-- <Adder visibility={adderVisibility} on:adder-closed={handleClosure}></Adder> -->
+    <Modal visibility={adderVisibility} component={AdderPanel} props={{}} on:modal-closed={handleClosure}></Modal>
 {/if}

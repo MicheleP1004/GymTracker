@@ -1,5 +1,7 @@
 <script lang="ts">
-	import WorkoutDetails from "./WorkoutDetails.svelte";
+	// import WorkoutDetails from "./WorkoutDetails.svelte";
+  import Modal from "./Modal.svelte";
+  import Details from "./Details.svelte";
 
     let {date, plan}: {date:string, plan:string} = $props();
 
@@ -46,6 +48,7 @@
   <!-- carico la chat solo se viene aperta -->
   {#if detailsVisibility}
   <!-- assegno handler evento chiusura chat -->
-    <WorkoutDetails visibility={detailsVisibility} plan={plan} date={date} on:details-closed={handleClosure}/>
+    <!-- <WorkoutDetails visibility={detailsVisibility} plan={plan} date={date} on:details-closed={handleClosure}/> -->
+    <Modal visibility={detailsVisibility} component={Details} props={{date,plan}} on:modal-closed={handleClosure}></Modal>
   {/if}
   

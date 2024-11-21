@@ -20,7 +20,7 @@
   .text{
     padding: 10px;
     align-self: center;
-    color: gray;
+    color: #3f3f3f;
     font-family: Arial, Helvetica, sans-serif;
   }
 </style>

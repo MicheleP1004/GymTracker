@@ -1,11 +1,14 @@
 <script  lang="ts">
     import {createEventDispatcher} from 'svelte';
 	//   import PlannerPanel from './PlannerPanel.svelte';
+
+  // export let component: any;
+
     
     const dispatch = createEventDispatcher();
     
       //flag di visibilità
-      let {visibility}: {visibility:boolean} = $props();
+      let {visibility,component,props}: {visibility:boolean,component:any,props: Record<string, any>} = $props();
   
       function close():void{
         visibility=false;
@@ -68,6 +71,14 @@
         <div class="exit-button" onclick={close} onkeyup={close} role="button" tabindex= 0>
           <img class="center" src="/DefaultPics/XIcon.png" alt="">
         </div>
-          <!-- <PlannerPanel></PlannerPanel> -->
+        {#if component}
+          <!-- {#key component}
+              {@html component.render(props)}
+          {/key} -->
+          <!-- svelte-ignore svelte_component_deprecated -->
+          <svelte:component this={component} {...props} />
+        {:else}
+            <h1>Nessun componente specificato</h1>
+        {/if}
       </div>
     {/if}

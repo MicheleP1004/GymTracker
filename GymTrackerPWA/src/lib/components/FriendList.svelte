@@ -32,7 +32,7 @@
 </script>
 
 <style>
-  .chat-list {
+  .friend-list {
     background-color: #e3f1e9;
     padding: 0%;
     height: 100%;
@@ -47,14 +47,14 @@
   .text{
     padding: 10px;
     align-self: center;
-    color: gray;
+    color: #3f3f3f;
     font-family: Arial, Helvetica, sans-serif;
   }
 </style>
 
-<div class="chat-list">
+<div class="friend-list">
     {#each state.chats as chat (chat.name)}
         <ChatButton propic={chat.propic} chatName={chat.name} />
     {/each}
-    <p class="text">Non sono presenti altre chat</p>
+    <p class="text">Non sono presenti altri amici</p>
 </div>

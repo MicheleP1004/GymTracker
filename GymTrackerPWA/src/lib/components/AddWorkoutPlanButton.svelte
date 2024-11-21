@@ -1,5 +1,7 @@
 <script lang="ts">
-    import Planner from "./Planner.svelte";
+    // import Planner from "./Planner.svelte";
+    import Modal from "./Modal.svelte";
+    import PlannerPanel from "./PlannerPanel.svelte";
 
     const addPlanImg:string ="/DefaultPics/icons8-writing-50.png";
 
@@ -37,5 +39,6 @@
 </div>
 
 {#if plannerVisibility}
-    <Planner visibility={plannerVisibility} on:planner-closed={handleClosure}></Planner>
+    <!-- <Planner visibility={plannerVisibility} on:planner-closed={handleClosure}></Planner> -->
+    <Modal visibility={plannerVisibility} component={PlannerPanel} props={{}} on:modal-closed={handleClosure}></Modal>
 {/if}

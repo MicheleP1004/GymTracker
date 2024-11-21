@@ -9,7 +9,9 @@
 
     let tipo:string = $state('');
 
-    import ModalStats from "./ModalStats.svelte";
+    // import ModalStats from "./ModalStats.svelte";
+	import Modal from "./Modal.svelte";
+  import CategoryStats from "./CategoryStats.svelte";
 
     let modalVisibility:boolean = $state(false);
 
@@ -95,5 +97,6 @@
 </div>
 
 {#if modalVisibility}
-    <ModalStats visibility={modalVisibility} s={tipo} on:modal-closed={handleClosure}></ModalStats>
+    <!-- <ModalStats visibility={modalVisibility} s={tipo} on:modal-closed={handleClosure}></ModalStats> -->
+    <Modal visibility={modalVisibility} component={CategoryStats} props={{tipo}} on:modal-closed={handleClosure}></Modal>
 {/if}

@@ -13,10 +13,13 @@
     let error:boolean = $state(false);
     let initialized:boolean = $state(false);
 
-    let scheda:Scheda|null = null;
-    let esercizi:(Esercizio|null)[] = [];
+    // svelte-ignore non_reactive_update
+        let scheda:Scheda|null = null;
+    // svelte-ignore non_reactive_update
+        let esercizi:(Esercizio|null)[] = [];
 
-    let workoutData:Workout;
+    // svelte-ignore non_reactive_update
+        let workoutData:Workout;
 
     $effect(()=>{
         fetchSchede(stato.uid);

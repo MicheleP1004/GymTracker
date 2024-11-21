@@ -11,11 +11,13 @@
     let loading:boolean=$state(true);
 
     let scheda:Scheda = $state(new Scheda(stato.uid,'','',[]));
-    let types:string[] = []; 
+    // svelte-ignore non_reactive_update
+        let types:string[] = []; 
 
     let data:Date|null = $state(null);
     let plan: string = $state('');
-    let sets: exSets[] = [];
+    // svelte-ignore non_reactive_update
+        let sets: exSets[] = [];
 
     $effect(()=>{
         fetchSchede(stato.uid);
