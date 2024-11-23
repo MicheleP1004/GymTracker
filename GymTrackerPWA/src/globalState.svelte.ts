@@ -73,9 +73,11 @@ export function addPlan(nome:string){
 }
 
 export function removeAllenamento(piano:string,data:string){
+    // console.log(stato.workouts.length);
     stato.workouts = stato.workouts.filter(
-        (workout) => workout.plan !== piano && workout.date !== data
+        (workout) => !(workout.plan === piano && workout.date === data)
     );
+    // console.log(stato.workouts.length);
 }
 
 export function removePlan(nome:string){

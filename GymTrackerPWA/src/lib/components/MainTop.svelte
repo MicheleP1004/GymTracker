@@ -24,6 +24,7 @@
       tipo = '';
       modalVisibility = false;
     }
+
 </script>
 
 <style>
