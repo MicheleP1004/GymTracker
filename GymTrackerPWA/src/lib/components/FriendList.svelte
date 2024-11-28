@@ -1,34 +1,6 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import ChatButton from './ChatButton.svelte';
-  
-    class Chat {
-      name: string;
-      propic: string;
-  
-      constructor(name: string, propic: string) {
-        this.name = name;
-        this.propic = propic;
-      }
-    }
-  
-    //array di prova
-    const state = $state({chats:[] as Chat[]});
-    // let chats2: Chat[] = [];
-  
-    function createChats() {
-      const defaultProPic = '/DefaultPics/ProfilePicture.jpg';
-      let tempChats:Chat[] = [];
-      for (let i = 0; i < 15; i++) {
-        tempChats.push(new Chat(`Prova ${i + 1}`, defaultProPic));
-      }
-      state.chats = tempChats;
-    }
-    
-    //popolo l'array dopo la creazione del DOM 
-    onMount(() => {
-      createChats();
-    });
+	  import { stato } from '../../globalState.svelte';
 </script>
 
 <style>
@@ -53,8 +25,8 @@
 </style>
 
 <div class="friend-list">
-    {#each state.chats as chat (chat.name)}
-        <ChatButton propic={chat.propic} chatName={chat.name} />
+    {#each stato.friends as f}
+        <ChatButton friend={f}/>
     {/each}
     <p class="text">Non sono presenti altri amici</p>
 </div>

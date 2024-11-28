@@ -1,23 +1,33 @@
 <script lang="ts">
-    //array di prova
-    let users: string[] = ["Mario Rossi", "Luigi Verdi", "Giovanni Bianchi", "Anna Neri", "Sara Gialli"];
-    
-    let searchTerm: string = '';
+	import { deliverRequest, fetchUsersWithTerm } from "../../firestore";
+	import { defaultPic, stato, type Friend } from "../../globalState.svelte";
 
-    //funzione per filtrare gli utenti in base al termine di ricerca
-    function filteredUsers(): string[] {
-        return users.filter(user => 
-            user.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    let searchTerm: string = '';
+    let users: Friend[] = []; 
+    let debounceTimeout: ReturnType<typeof setTimeout>;
+
+    async function handleSearch(term: string): Promise<void> {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(async () => {
+            if (term.trim() === '') {
+                users = [];
+                return;
+            }
+            users = await fetchUsersWithTerm(term); 
+        }, 200); 
+    }
+
+    function sendRequest(id:string){
+        deliverRequest(id,stato.uid);
+        alert("Richiesta inviata!");
     }
 </script>
 
 <style>
     .search-container {
-        top :25%;
+        top: 25%;
         position: relative;
         width: 100%;
-        /* max-width: 300px; */
         margin-bottom: 1em;
     }
 
@@ -27,6 +37,7 @@
         width: 100%;
         box-sizing: border-box;
         border-radius: 12px;
+        border: 1px solid #ccc;
     }
 
     .dropdown {
@@ -34,7 +45,7 @@
         top: 100%; 
         left: 0;
         right: 0;
-        max-height: 200px; 
+        max-height: 200px;
         overflow-y: auto;  
         background-color: white;
         border: 1px solid #ccc;
@@ -50,14 +61,33 @@
     .dropdown li {
         padding: 0.5em;
         font-size: 1.1em;
+        display: flex;
+        align-items: center; /* Centrato su un asse orizzontale */
+        justify-content: space-between; /* Posiziona il bottone sulla destra */
+    }
+
+    .dropdown img {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        margin-right: 10px; /* Spazio tra immagine e testo */
+    }
+
+    .text {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .button {
+        background-color: #ffffff;
+        color: rgb(0, 0, 0);
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
         cursor: pointer;
     }
 
-    .dropdown li:hover {
-        background-color: #f0f0f0;
-    }
-    .text{
-        font-family: Arial, Helvetica, sans-serif;
+    .button:hover {
+        background-color: #88c9aa;
     }
 </style>
 
@@ -65,14 +95,25 @@
     <input 
         type="text" 
         bind:value={searchTerm} 
-        placeholder="Cerca utente..."
+        oninput={() => handleSearch(searchTerm)} 
+        placeholder="Cerca utente..." 
         class="search-bar" 
     />
     
-    {#if searchTerm && filteredUsers().length > 0}
+    {#if searchTerm && users.length > 0}
     <ul class="dropdown">
-        {#each filteredUsers() as user}
-            <li class="text">{user}</li>
+        {#each users as u (u.uid)} 
+            {#if u.uid != stato.uid }
+                <li class="text">
+                    <div style="display: flex; align-items: center;">
+                        <img src={u.propic || defaultPic} alt={u.username} />
+                        <p class="text" style="margin-right: 10px;">{u.username}</p>
+                    </div>
+                    {#if !stato.friends.find(x => x==u.uid)}
+                        <button class="button" onclick={()=>{sendRequest(u.uid);}}>Aggiungi</button>
+                    {/if}
+                </li>
+            {/if}
         {/each}
     </ul>
     {/if}

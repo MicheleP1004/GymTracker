@@ -17,6 +17,7 @@
 	import Login from '$lib/components/Login.svelte';
 	import Modal from '$lib/components/Modal.svelte';
   import RequestsList from '$lib/components/RequestsList.svelte';
+	import { startUserListener, stopUserListener } from '../listener';
 
   let loading:boolean = $state(true);
 
@@ -45,6 +46,7 @@
     let data: Utente | null = await(db.getUserData(id));
       if(data != null){
         setUtente(data);
+        startUserListener();
       }
   }
 
@@ -53,6 +55,7 @@
     try {
       await logoutUser();   //logout
       user = null;
+      stopUserListener();
       setUtente({
         uid: '',
         email: '',
@@ -61,7 +64,8 @@
         friends: [],
         workouts: [],
         plans: [],
-        propic: "/DefaultPics/ProfilePicture.jpg"
+        propic: "/DefaultPics/ProfilePicture.jpg",
+        requests:[],
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -88,6 +92,7 @@
     margin: 0%;
     height: 90vh;
     grid-template-columns: 70% 30%;
+    grid-template-rows: 1fr 12% ;
     padding: 0.5%;
     box-sizing: border-box;
   }

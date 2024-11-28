@@ -5,6 +5,7 @@
     import { loginUser, registerUser, loginWithGoogle } from '../../auth';
     import * as db from '../../firestore';
     import {setUtente} from '../../globalState.svelte';
+	import { startUserListener } from '../../listener';
 
     let email: string = '';
     let password: string = '';
@@ -29,6 +30,7 @@
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
         if(data != null){
           setUtente(data);
+          startUserListener();
         }
       }
 
@@ -49,8 +51,10 @@
 
       if(userCred != null){
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
-        if(data != null)
+        if(data != null){
           setUtente(data);
+          startUserListener();
+        }
       }
 
     } catch (err) {
@@ -86,6 +90,7 @@
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
         if(data != null){
           setUtente(data);
+          startUserListener();
           }
       }
 

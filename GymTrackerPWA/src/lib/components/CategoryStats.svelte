@@ -109,19 +109,38 @@
     }
 
     function weeksAgo(eventDateStr: string, today: Date): number {
-        const eventDate = new Date(eventDateStr);
-        const msPerDay = 24 * 60 * 60 * 1000;
-        const msDifference = today.getTime() - eventDate.getTime();
-        const currentWeek = Math.floor((today.getTime() + msPerDay * (today.getDay() ? today.getDay() - 1 : 6)) / (msPerDay * 7));
-        const eventWeek = Math.floor((eventDate.getTime() + msPerDay * (eventDate.getDay() ? eventDate.getDay() - 1 : 6)) / (msPerDay * 7));
-        const weekDifference = currentWeek - eventWeek;
+    const msPerDay = 24 * 60 * 60 * 1000;
 
-        if (weekDifference < 1 || weekDifference > 12) {
-            return -1;
-        }
-
-        return weekDifference - 1;
+    // Data dell'evento e controllo validità
+    const eventDate = new Date(eventDateStr);
+    if (isNaN(eventDate.getTime())) {
+        console.error(`Data non valida: ${eventDateStr}`);
+        return -1;
     }
+
+    // Calcolo dell'inizio della settimana corrente (lunedì)
+    const todayStartOfWeek = new Date(today);
+    todayStartOfWeek.setHours(0, 0, 0, 0);
+    todayStartOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+
+    // Calcolo dell'inizio della settimana dell'evento (lunedì)
+    const eventStartOfWeek = new Date(eventDate);
+    eventStartOfWeek.setHours(0, 0, 0, 0);
+    eventStartOfWeek.setDate(eventDate.getDate() - eventDate.getDay() + (eventDate.getDay() === 0 ? -6 : 1));
+
+    // Differenza in giorni tra l'inizio delle due settimane
+    const dayDifference = Math.floor((todayStartOfWeek.getTime() - eventStartOfWeek.getTime()) / msPerDay);
+
+    // Calcolo della differenza in settimane
+    const weekDifference = Math.floor(dayDifference / 7);
+
+    // Restituisci -1 se l'evento è di questa settimana o oltre 12 settimane fa
+    if (weekDifference < 1 || weekDifference > 12) {
+        return -1;
+    }
+
+    return weekDifference - 1;
+}
 
     // Crea il grafico
     function createChart() {

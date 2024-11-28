@@ -1,7 +1,7 @@
 import { collection, query, where, addDoc, getDocs, setDoc, doc, getDoc, updateDoc, arrayUnion, deleteDoc,arrayRemove } from 'firebase/firestore';
 import type { DocumentData, QuerySnapshot } from 'firebase/firestore';
 import { db,storage} from './firebase';
-import type { Utente} from './globalState.svelte';
+import type { Utente,Friend} from './globalState.svelte';
 import type { Esercizio,Scheda,Workout } from './data.svelte';
 
 //aggiunge un nuovo documento
@@ -74,7 +74,8 @@ export async function getUserData(id: string): Promise<Utente | null> {
         friends: data.friends || [],
         workouts: data.workouts || [],
         plans: data.plans || [],
-        propic: data.propic
+        propic: data.propic,
+        requests: data.requests,
       } as Utente;
     } else {
       console.log('Documento utente non trovato.');
@@ -304,3 +305,167 @@ export async function deleteEsercizio(owner: string, name: string): Promise<void
     console.error('Errore eliminando l\'esercizio: ', e);
   }
 }
+
+export async function addRequest(receiver: string,sender:string): Promise<void> {
+  try {
+    const userDocRef = doc(db, 'users', receiver);
+
+    await updateDoc(userDocRef, {
+      requests: arrayUnion(sender)
+    });
+
+    console.log(`Richiesta di amicizia inviata a ${receiver}`);
+  } catch (e) {
+    console.error('Errore inviando la richiesta di amicizia: ', e);
+  }
+}
+
+
+export async function deleteRequest(id: string,uid:string): Promise<void> {
+  try {
+    const userDocRef = doc(db, 'users', uid);
+
+    await updateDoc(userDocRef, {
+      requests: arrayRemove(id)
+    });
+
+    console.log(`Richiesta di amicizia da ${id} rimossa.`);
+  } catch (e) {
+    console.error('Errore rimuovendo la richiesta di amicizia: ', e);
+  }
+}
+
+
+export async function addFriend(id1: string, id2: string): Promise<void> {
+  try {
+    const user1DocRef = doc(db, 'users', id1);
+    const user2DocRef = doc(db, 'users', id2);
+
+    await Promise.all([
+      updateDoc(user1DocRef, {
+        friends: arrayUnion(id2)
+      }),
+      updateDoc(user2DocRef, {
+        friends: arrayUnion(id1)
+      })
+    ]);
+
+    console.log(`Amicizia aggiunta tra ${id1} e ${id2}.`);
+  } catch (e) {
+    console.error('Errore aggiungendo l\'amicizia: ', e);
+  }
+}
+
+export async function getUserDataAsFriend(id: string): Promise<Friend | null> {
+  try {
+    // Recupera i dati dell'utente
+    const userData = await getUserData(id);
+
+    if (!userData) {
+      console.log(`Utente con ID ${id} non trovato.`);
+      return null;
+    }
+
+    // Crea un oggetto Friend con i dati pertinenti
+    const friend: Friend = {
+      uid: userData.uid,
+      username: userData.username,
+      propic: userData.propic || '', // Se l'immagine del profilo è mancante, assegna una stringa vuota
+    };
+
+    return friend;
+  } catch (error) {
+    console.error(`Errore recuperando i dati come Friend per l'utente ${id}: `, error);
+    return null;
+  }
+}
+
+export async function deleteFriendship(id1: string, id2: string): Promise<void> {
+  try {
+    const user1DocRef = doc(db, 'users', id1);
+    const user2DocRef = doc(db, 'users', id2);
+
+    // Rimuove gli utenti dalla lista amici reciproca
+    await Promise.all([
+      updateDoc(user1DocRef, {
+        friends: arrayRemove(id2) // Rimuove direttamente la stringa ID
+      }),
+      updateDoc(user2DocRef, {
+        friends: arrayRemove(id1)
+      })
+    ]);
+
+    console.log(`Amicizia rimossa tra ${id1} e ${id2}.`);
+  } catch (e) {
+    console.error('Errore rimuovendo l\'amicizia: ', e);
+  }
+}
+
+export async function fetchUsersWithTerm(term: string): Promise<Friend[]> {
+  try {
+      const q = query(
+          collection(db, 'users'),
+          where('username', '>=', term),
+          where('username', '<=', term + '\uf8ff') // Filtro per nomi che iniziano con il termine
+      );
+
+      const querySnapshot = await getDocs(q);
+      const friends: Friend[] = [];
+
+      querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          friends.push({
+              uid: doc.id,
+              username: data.username,
+              propic: data.propic || '', // Assicurati che `propic` sia opzionale o gestito in modo adeguato
+          });
+      });
+
+      return friends;
+  } catch (error) {
+      console.error('Errore durante la ricerca degli utenti:', error);
+      return [];
+  }
+}
+
+export async function deliverRequest(receiverId: string, senderId: string): Promise<void> {
+  try {
+    // Riferimento al documento dell'utente ricevente
+    const receiverDocRef = doc(db, 'users', receiverId);
+
+    // Aggiunge l'ID del mittente al campo "requests" del ricevente
+    await updateDoc(receiverDocRef, {
+      requests: arrayUnion(senderId)
+    });
+
+    console.log(`Richiesta di amicizia da ${senderId} consegnata a ${receiverId}`);
+  } catch (error) {
+    console.error(`Errore durante la consegna della richiesta di amicizia: `, error);
+  }
+}
+// // Recupera le richieste di amicizia dal campo "requests" della collezione "users"
+// export async function getFriendRequests(userId: string): Promise<string[]> {
+//   try {
+//     // Recupera il documento dell'utente dalla collezione "users"
+//     const userDoc = await getDoc(doc(db, 'users', userId));
+
+//     if (userDoc.exists()) {
+//       const data = userDoc.data();
+
+//       // Controlla se il campo "requests" esiste ed è un array
+//       if (data.requests && Array.isArray(data.requests)) {
+//         console.log('Richieste di amicizia recuperate:', data.requests);
+//         return data.requests as string[];
+//       } else {
+//         console.log('Nessuna richiesta di amicizia trovata.');
+//         return [];
+//       }
+//     } else {
+//       console.log('Documento utente non trovato.');
+//       return [];
+//     }
+//   } catch (e) {
+//     console.error('Errore recuperando le richieste di amicizia: ', e);
+//     return [];
+//   }
+// }

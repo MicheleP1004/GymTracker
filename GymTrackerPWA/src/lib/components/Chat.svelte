@@ -1,9 +1,11 @@
 <script  lang="ts">
-  let {propic, chatName}: {propic:string, chatName:string} = $props();
+	import type { Friend } from "../../globalState.svelte";
+
+  let {f}: {f:Friend} = $props();
 </script>
 
 <style>
     
 </style>
   
-  <h1>{chatName}</h1>
+  <h1>{f.username}</h1>
