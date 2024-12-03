@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { deliverRequest, fetchUsersWithTerm } from "../../firestore";
+	import { deliverRequest, fetchUsersWithTerm, sendNotification } from "../../firestore";
 	import { defaultPic, stato, type Friend } from "../../globalState.svelte";
 
     let searchTerm: string = '';
@@ -17,8 +17,11 @@
         }, 200); 
     }
 
-    function sendRequest(id:string){
+    async function sendRequest(id:string){
         deliverRequest(id,stato.uid);
+        let icon = stato.propic?stato.propic : "gs://gymtrackerpwa.appspot.com/ProfilePicture.jpg";
+        icon = icon !== defaultPic? icon : "gs://gymtrackerpwa.appspot.com/ProfilePicture.jpg";
+        await sendNotification(id,"Nuova richiesta!","Hai ricevuto una richiesta di amiciczia da "+stato.username,icon);
         alert("Richiesta inviata!");
     }
 </script>

@@ -1,7 +1,7 @@
-import { collection, query, where, addDoc, getDocs, setDoc, doc, getDoc, updateDoc, arrayUnion, deleteDoc,arrayRemove } from 'firebase/firestore';
-import type { DocumentData, QuerySnapshot } from 'firebase/firestore';
+import { collection, query, where, addDoc, getDocs, setDoc, doc, getDoc, updateDoc, arrayUnion, deleteDoc,arrayRemove, orderBy, limit, startAfter } from 'firebase/firestore';
+import type { DocumentData, QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 import { db,storage} from './firebase';
-import type { Utente,Friend} from './globalState.svelte';
+import { type Utente,type Friend, Chat, type Message} from './globalState.svelte';
 import type { Esercizio,Scheda,Workout } from './data.svelte';
 
 //aggiunge un nuovo documento
@@ -76,6 +76,7 @@ export async function getUserData(id: string): Promise<Utente | null> {
         plans: data.plans || [],
         propic: data.propic,
         requests: data.requests,
+        pushToken: data.pushToken,
       } as Utente;
     } else {
       console.log('Documento utente non trovato.');
@@ -335,22 +336,31 @@ export async function deleteRequest(id: string,uid:string): Promise<void> {
   }
 }
 
-
 export async function addFriend(id1: string, id2: string): Promise<void> {
   try {
+    // Creiamo un ID documento ordinato
+    const docId = [id1, id2].sort().join('_'); // Ordiniamo id1 e id2 per evitare duplicati
+
+    // Aggiungiamo l'amicizia al documento
+    await setDoc(doc(db, 'chats', docId), {
+      users: [id1, id2],
+      messages:[],
+    });
+
+    // Aggiorniamo le liste amici dei due utenti
     const user1DocRef = doc(db, 'users', id1);
     const user2DocRef = doc(db, 'users', id2);
 
     await Promise.all([
       updateDoc(user1DocRef, {
-        friends: arrayUnion(id2)
+        friends: arrayUnion(id2),
       }),
       updateDoc(user2DocRef, {
-        friends: arrayUnion(id1)
-      })
+        friends: arrayUnion(id1),
+      }),
     ]);
 
-    console.log(`Amicizia aggiunta tra ${id1} e ${id2}.`);
+    console.log(`Amicizia aggiunta tra ${id1} e ${id2}`);
   } catch (e) {
     console.error('Errore aggiungendo l\'amicizia: ', e);
   }
@@ -382,20 +392,27 @@ export async function getUserDataAsFriend(id: string): Promise<Friend | null> {
 
 export async function deleteFriendship(id1: string, id2: string): Promise<void> {
   try {
+    // Creiamo un ID documento ordinato
+    const docId = [id1, id2].sort().join('_'); // Ordiniamo id1 e id2 per evitare duplicati
+
+    // Rimuoviamo il documento dell'amicizia
+    const friendshipDocRef = doc(db, 'chats', docId);
+    await deleteDoc(friendshipDocRef);
+
+    // Rimuoviamo gli utenti dalla lista amici reciproca
     const user1DocRef = doc(db, 'users', id1);
     const user2DocRef = doc(db, 'users', id2);
 
-    // Rimuove gli utenti dalla lista amici reciproca
     await Promise.all([
       updateDoc(user1DocRef, {
-        friends: arrayRemove(id2) // Rimuove direttamente la stringa ID
+        friends: arrayRemove(id2),
       }),
       updateDoc(user2DocRef, {
-        friends: arrayRemove(id1)
-      })
+        friends: arrayRemove(id1),
+      }),
     ]);
 
-    console.log(`Amicizia rimossa tra ${id1} e ${id2}.`);
+    console.log(`Amicizia rimossa tra ${id1} e ${id2}`);
   } catch (e) {
     console.error('Errore rimuovendo l\'amicizia: ', e);
   }
@@ -443,29 +460,161 @@ export async function deliverRequest(receiverId: string, senderId: string): Prom
     console.error(`Errore durante la consegna della richiesta di amicizia: `, error);
   }
 }
-// // Recupera le richieste di amicizia dal campo "requests" della collezione "users"
-// export async function getFriendRequests(userId: string): Promise<string[]> {
-//   try {
-//     // Recupera il documento dell'utente dalla collezione "users"
-//     const userDoc = await getDoc(doc(db, 'users', userId));
 
-//     if (userDoc.exists()) {
-//       const data = userDoc.data();
+export async function storeFCMToken(id: string, token: string) {
+  try {
+      const userRef = doc(db, 'users', id); // Usa l'id passato per il documento
+      await setDoc(userRef, {
+          pushToken: token
+      }, { merge: true }); // Usa 'merge' per evitare di sovrascrivere altri dati
+      console.log("Token salvato per l'utente con ID:", id);
+  } catch (error) {
+      console.error("Errore durante il salvataggio del token:", error);
+  }
+}
 
-//       // Controlla se il campo "requests" esiste ed è un array
-//       if (data.requests && Array.isArray(data.requests)) {
-//         console.log('Richieste di amicizia recuperate:', data.requests);
-//         return data.requests as string[];
-//       } else {
-//         console.log('Nessuna richiesta di amicizia trovata.');
-//         return [];
-//       }
-//     } else {
-//       console.log('Documento utente non trovato.');
-//       return [];
-//     }
-//   } catch (e) {
-//     console.error('Errore recuperando le richieste di amicizia: ', e);
-//     return [];
+export async function getPushToken(id: string): Promise<string | null> {
+  try {
+    // Recupera il documento dell'utente dalla collection 'users'
+    const userDocRef = doc(db, 'users', id);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      // Restituisce il pushToken se presente
+      return userData?.pushToken || null;
+    } else {
+      console.log(`Utente con ID ${id} non trovato.`);
+      return null;
+    }
+  } catch (e) {
+    console.error('Errore recuperando il pushToken:', e);
+    return null;
+  }
+}
+
+export async function sendNotification(id: string, title: string, body: string, icon: string) {
+  try {
+    // Ottieni il pushToken dell'utente
+    const token = await getPushToken(id);
+    if (!token) {
+      console.log('Token non trovato, impossibile inviare la notifica');
+      return;
+    }
+
+    // Crea un nuovo documento nella collection 'notifications' per inviare la notifica
+    await addDoc(collection(db, 'notifications'), {
+      title: title,
+      body: body,
+      icon: icon,
+      token: token,  // Usa il token dell'utente per inviare la notifica
+    });
+
+    console.log('Notifica aggiunta alla collection notifications');
+  } catch (e) {
+    console.error('Errore durante l\'invio della notifica:', e);
+  }
+}
+
+export async function fetchChat(id1: string, id2: string): Promise<Chat | null> {
+  const [sortedId1, sortedId2] = [id1, id2].sort();
+  const chatDocId = `${sortedId1}_${sortedId2}`;
+
+  const chatsCollection = collection(db, 'chats');
+
+  const chatDocRef = doc(chatsCollection, chatDocId);
+
+  const chatDoc = await getDoc(chatDocRef);
+
+  if (!chatDoc.exists()) {
+    console.error('Chat non trovata per gli ID:', id1, id2);
+    return null; 
+  }
+
+  const chatData = chatDoc.data();
+
+  const messages: Message[] =
+    chatData?.messages.map((msg: any) => ({
+      sender: msg.sender,
+      text: msg.text,
+      timestamp: msg.timestamp,
+    })) || [];
+
+  return new Chat(id1, id2, messages);
+}
+
+// // Primo caricamento: Carica i primi n messaggi
+// export async function fetchChat(
+//   id1: string,
+//   id2: string,
+//   maxMsg: number
+// ): Promise<Chat | null> {
+//   const [sortedId1, sortedId2] = [id1, id2].sort();
+//   const chatDocId = `${sortedId1}_${sortedId2}`;
+
+//   const chatsCollection = collection(db, 'chats');
+//   const chatDocRef = doc(chatsCollection, chatDocId);
+
+//   // Verifica se la chat esiste
+//   const chatDocSnapshot = await getDocs(query(chatsCollection));
+//   if (chatDocSnapshot.empty) {
+//     console.error('Chat non trovata per gli ID:', id1, id2);
+//     return null;
 //   }
+
+//   // Ottieni la sottocollezione `messages` per eseguire la query
+//   const messagesCollection = collection(chatDocRef, 'messages');
+
+//   // Query per i primi n messaggi
+//   const messagesQuery = query(
+//     messagesCollection,
+//     orderBy('timestamp', 'desc'),
+//     limit(maxMsg) // Limita il numero di messaggi
+//   );
+
+//   const snapshot = await getDocs(messagesQuery);
+
+//   const messages: Message[] = snapshot.docs.map((doc) => ({
+//     sender: doc.data().sender,
+//     text: doc.data().text,
+//     timestamp: doc.data().timestamp,
+//   }));
+
+//   // Ottieni il cursore per il prossimo caricamento
+//   const lastVisible = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null;
+
+//   // Crea e restituisci l'oggetto Chat
+//   const chat = new Chat(sortedId1, sortedId2, messages);
+//   chat.cursor = lastVisible; // Imposta il cursore
+//   return chat;
 // }
+
+
+
+export async function sendMessage(receiver: string, sender: string, text: string): Promise<void> {
+  // Ordina gli ID per garantire che l'ordine sia sempre lo stesso
+  const [sortedReceiver, sortedSender] = [receiver, sender].sort();
+
+  // Genera l'ID del documento della chat
+  const chatDocId = `${sortedReceiver}_${sortedSender}`;
+
+  // Crea un riferimento al documento della chat
+  const chatDocRef = doc(collection(db, 'chats'), chatDocId);
+
+  // Crea un nuovo messaggio
+  const newMessage: Message = {
+    sender,
+    text,
+    timestamp: Date.now(),
+  };
+
+  // Aggiungi il nuovo messaggio all'array "messages" nel documento della chat
+  try {
+    await updateDoc(chatDocRef, {
+      messages: arrayUnion(newMessage), // arrayUnion è usato per aggiungere senza duplicare
+    });
+    console.log('Messaggio inviato con successo');
+  } catch (error) {
+    console.error('Errore nell\'inviare il messaggio:', error);
+  }
+}

@@ -30,7 +30,7 @@
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
         if(data != null){
           setUtente(data);
-          startUserListener();
+          // startUserListener();
         }
       }
 
@@ -53,7 +53,7 @@
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
         if(data != null){
           setUtente(data);
-          startUserListener();
+          // startUserListener();
         }
       }
 
@@ -90,7 +90,7 @@
         let data: Utente | null = await(db.getUserData(userCred.user.uid));
         if(data != null){
           setUtente(data);
-          startUserListener();
+          // startUserListener();
           }
       }
 

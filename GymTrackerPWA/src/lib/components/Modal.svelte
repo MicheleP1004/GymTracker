@@ -18,6 +18,11 @@
   </script>
   
   <style>
+      .container{
+        height: 90%;
+        width: 100%;
+        box-sizing: border-box;
+      }
       .modal {
         display: grid;
         position: fixed;
@@ -72,11 +77,10 @@
           <img class="center" src="/DefaultPics/XIcon.png" alt="">
         </div>
         {#if component}
-          <!-- {#key component}
-              {@html component.render(props)}
-          {/key} -->
           <!-- svelte-ignore svelte_component_deprecated -->
-          <svelte:component this={component} {...props} />
+           <div class="container">
+              <svelte:component this={component} {...props} />
+           </div>
         {:else}
             <h1>Nessun componente specificato</h1>
         {/if}
