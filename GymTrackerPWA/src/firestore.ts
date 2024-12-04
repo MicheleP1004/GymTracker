@@ -1,7 +1,7 @@
 import { collection, query, where, addDoc, getDocs, setDoc, doc, getDoc, updateDoc, arrayUnion, deleteDoc,arrayRemove, orderBy, limit, startAfter } from 'firebase/firestore';
 import type { DocumentData, QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 import { db,storage} from './firebase';
-import { type Utente,type Friend, Chat, type Message} from './globalState.svelte';
+import { type Utente,type Friend, Chat, type Message, defaultPic} from './globalState.svelte';
 import type { Esercizio,Scheda,Workout } from './data.svelte';
 
 //aggiunge un nuovo documento
@@ -592,6 +592,13 @@ export async function fetchChat(id1: string, id2: string): Promise<Chat | null> 
 
 
 export async function sendMessage(receiver: string, sender: string, text: string): Promise<void> {
+  let me:Utente|null=await getUserData(sender);
+
+  if(!me){
+    console.error("Errore nel recupero dei propri dati per inviare messaggio");
+    return;
+  }
+
   // Ordina gli ID per garantire che l'ordine sia sempre lo stesso
   const [sortedReceiver, sortedSender] = [receiver, sender].sort();
 
@@ -611,9 +618,10 @@ export async function sendMessage(receiver: string, sender: string, text: string
   // Aggiungi il nuovo messaggio all'array "messages" nel documento della chat
   try {
     await updateDoc(chatDocRef, {
-      messages: arrayUnion(newMessage), // arrayUnion è usato per aggiungere senza duplicare
+      messages: arrayUnion(newMessage), 
     });
     console.log('Messaggio inviato con successo');
+    sendNotification(receiver,"Nuovo Messaggio!","Hai ricevuto un nuovo messaggio da "+me?.username,me?.propic||defaultPic);
   } catch (error) {
     console.error('Errore nell\'inviare il messaggio:', error);
   }

@@ -1,6 +1,6 @@
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
-import { stato, updateFriends, updateRequests } from "./globalState.svelte";
+import { Chat, stato, updateFriends, updateRequests, type Message } from "./globalState.svelte";
 
 let unsubscribe: () => void;
 
@@ -39,4 +39,59 @@ export function stopUserListener() {
     unsubscribe();
     console.log("Listener rimosso");
   }
+}
+
+/**
+ * Avvia un listener su una chat in Firestore.
+ * @param chatKey - La chiave univoca della chat.
+ * @param onUpdate - Funzione callback per aggiornare i dati della chat.
+ * @returns Una funzione per interrompere il listener.
+ */
+export function startChatListener(
+  chatKey: string,
+  onUpdate: (updatedChat: Chat) => void
+): () => void {
+  const chatDocRef = doc(db, "chats", chatKey);
+
+  const unsubscribe = onSnapshot(
+    chatDocRef,
+    (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data() as { messages: Message[] };
+        const chat = new Chat(chatKey.split("_")[0], chatKey.split("_")[1], data.messages);
+        onUpdate(chat);
+      } else {
+        console.log(`Documento per la chat ${chatKey} non trovato.`);
+      }
+    },
+    (error) => {
+      console.error(`Errore nel listener della chat ${chatKey}:`, error);
+    }
+  );
+
+  return unsubscribe;
+}
+
+/**
+ * Interrompe un listener Firestore.
+ * @param unsubscribe - La funzione per interrompere il listener.
+ */
+export function stopChatListener(unsubscribe: () => void): void {
+  unsubscribe();
+}
+
+/**
+ * Recupera una chat da Firestore.
+ * @param id1 - ID del primo utente.
+ * @param id2 - ID del secondo utente.
+ * @returns Un'istanza della chat o null se non trovata.
+ */
+export async function fetchChat(
+  id1: string,
+  id2: string
+): Promise<Chat | null> {
+  const chatKey = [id1, id2].sort().join(":");
+  console.log(`Fetching chat: ${chatKey}`);
+  // Simula il recupero di dati da Firestore
+  return new Chat(id1, id2, []); // Sostituisci con il fetch reale
 }

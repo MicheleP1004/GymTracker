@@ -1,5 +1,6 @@
 import type { QueryDocumentSnapshot } from "firebase/firestore";
 import { addFriend, deleteFriendship, deleteRequest, fetchChat } from "./firestore";
+import { startChatListener, stopChatListener } from "./listener";
 
 export const maxChats:number=3;
 export const maxMsg:number = 10;
@@ -81,58 +82,150 @@ export class Chat{
     }
 }
 
-export class ChatManager{
-    chats:Chat[]=[];
-    tail:number=0;
-    head:number=0;
-
-    public async addChat(id1: string, id2: string): Promise<Chat|null> {
-        // Controlla se la chat esiste già
-        const existingIndex = this.chats.findIndex(
-          (c) => c.users.includes(id1) && c.users.includes(id2)
-        );
-      
-        if (existingIndex !== -1) {
-          // Se esiste, sposta la chat esistente in coda
-          const existingChat = this.chats[existingIndex];
-          // Sposta la chat in coda se non è già lì
-          if (existingIndex !== this.tail) {
-            this.head = this.tail;
-            this.tail = (this.tail + 1) % maxChats;
-          }
-          return existingChat;
-        }
-      
-        // Recupera la chat da Firestore se non esiste
-        const chat = await fetchChat(id1, id2);
-        // const chat = await fetchChat(id1, id2, maxMsg);
-
-        if(!chat){return null};
-      
-        if (this.chats.length < maxChats) {
-          // Se c'è ancora spazio, aggiungi la chat
-          this.chats.push(chat);
-          this.tail = (this.tail + 1) % maxChats;
-        } else {
-          // Se non c'è spazio, sostituisci la chat più vecchia
-          this.chats[this.tail] = chat;
-          this.head = (this.tail + 1) % maxChats;
-          this.tail = (this.tail + 1) % maxChats;
-        }
-      
-        return chat;
-      }
-      
-
-    public getChats(): Chat[] {
-        return this.chats;
-      }
-
-    public getChat(id1: string, id2: string): Chat | null {
-        return this.chats.find(chat => chat.users.includes(id1) && chat.users.includes(id2)) || null;
+export class ChatManager {
+    chats: Chat[] = [];
+    tail: number = 0;
+    head: number = 0;
+    private listeners: Map<string, () => void> = new Map(); // Listener attivi
+  
+    private getChatKey(id1: string, id2: string): string {
+      return [id1, id2].sort().join("_"); // Genera una chiave univoca per la chat
     }
+  
+    private addListener(chatKey: string, chat: Chat) {
+      const unsubscribe = startChatListener(chatKey, (updatedChatData) => {
+        chat.messages.push(...updatedChatData.messages || []);
+        console.log(`Aggiornati i messaggi per la chat ${chatKey}`);
+      });
+  
+      this.listeners.set(chatKey, unsubscribe);
+      console.log(`Listener avviato per la chat ${chatKey}`);
+    }
+  
+    private removeListener(chatKey: string) {
+      const unsubscribe = this.listeners.get(chatKey);
+      if (unsubscribe) {
+        stopChatListener(unsubscribe);
+        this.listeners.delete(chatKey);
+        console.log(`Listener rimosso per la chat ${chatKey}`);
+      }
+    }
+  
+    public async addChat(id1: string, id2: string): Promise<Chat | null> {
+      const chatKey = this.getChatKey(id1, id2);
+  
+      // Verifica se la chat esiste già
+      const existingIndex = this.chats.findIndex(
+        (c) => this.getChatKey(c.users[0], c.users[1]) === chatKey
+      );
+  
+      if (existingIndex !== -1) {
+        const existingChat = this.chats[existingIndex];
+        // Porta la chat in coda se non è già lì
+        if (existingIndex !== this.tail) {
+          this.head = this.tail;
+          this.tail = (this.tail + 1) % maxChats;
+        }
+        return existingChat;
+      }
+  
+      // Recupera la chat da Firestore
+      const chatData = await fetchChat(id1, id2);
+      if (!chatData) return null;
+  
+      const chat = new Chat(id1, id2, chatData.messages);
+  
+      // Aggiungi o sostituisci la chat nella struttura circolare
+      if (this.chats.length < maxChats) {
+        this.chats.push(chat);
+        this.tail = (this.tail + 1) % maxChats;
+      } else {
+        const oldestChat = this.chats[this.tail];
+        const oldestKey = this.getChatKey(oldestChat.users[0], oldestChat.users[1]);
+        this.removeListener(oldestKey); // Interrompe il listener per la chat più vecchia
+  
+        this.chats[this.tail] = chat;
+        this.head = (this.tail + 1) % maxChats;
+        this.tail = (this.tail + 1) % maxChats;
+      }
+  
+      this.addListener(chatKey, chat); // Avvia il listener per la nuova chat
+      return chat;
+    }
+  
+    public removeChat(id1: string, id2: string): void {
+      const chatKey = this.getChatKey(id1, id2);
+      const index = this.chats.findIndex(
+        (chat) => this.getChatKey(chat.users[0], chat.users[1]) === chatKey
+      );
+  
+      if (index !== -1) {
+        this.chats.splice(index, 1);
+        this.removeListener(chatKey); // Rimuovi il listener della chat
+      }
+    }
+  
+    public getChats(): Chat[] {
+      return this.chats;
+    }
+  
+    public getChat(id1: string, id2: string): Chat | null {
+      return this.chats.find(
+        (chat) => this.getChatKey(chat.users[0], chat.users[1]) === this.getChatKey(id1, id2)
+      ) || null;
+    }
+  }
+// export class ChatManager{
+//     chats:Chat[]=[];
+//     tail:number=0;
+//     head:number=0;
+
+//     public async addChat(id1: string, id2: string): Promise<Chat|null> {
+//         // Controlla se la chat esiste già
+//         const existingIndex = this.chats.findIndex(
+//           (c) => c.users.includes(id1) && c.users.includes(id2)
+//         );
       
-}
+//         if (existingIndex !== -1) {
+//           // Se esiste, sposta la chat esistente in coda
+//           const existingChat = this.chats[existingIndex];
+//           // Sposta la chat in coda se non è già lì
+//           if (existingIndex !== this.tail) {
+//             this.head = this.tail;
+//             this.tail = (this.tail + 1) % maxChats;
+//           }
+//           return existingChat;
+//         }
+      
+//         // Recupera la chat da Firestore se non esiste
+//         const chat = await fetchChat(id1, id2);
+//         // const chat = await fetchChat(id1, id2, maxMsg);
+
+//         if(!chat){return null};
+      
+//         if (this.chats.length < maxChats) {
+//           // Se c'è ancora spazio, aggiungi la chat
+//           this.chats.push(chat);
+//           this.tail = (this.tail + 1) % maxChats;
+//         } else {
+//           // Se non c'è spazio, sostituisci la chat più vecchia
+//           this.chats[this.tail] = chat;
+//           this.head = (this.tail + 1) % maxChats;
+//           this.tail = (this.tail + 1) % maxChats;
+//         }
+      
+//         return chat;
+//       }
+
+//     public getChats(): Chat[] {
+//         return this.chats;
+//       }
+
+//     public getChat(id1: string, id2: string): Chat | null {
+//         return this.chats.find(chat => chat.users.includes(id1) && chat.users.includes(id2)) || null;
+//     }
+      
+// }
 
 export const chats=new ChatManager();
 
