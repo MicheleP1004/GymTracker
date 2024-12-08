@@ -2,10 +2,6 @@
 	import { getUserDataAsFriend } from '../../firestore';
 	import { defaultPic, Friend, removeFriend } from '../../globalState.svelte';
 
-    // export let propic: string;
-    // export let userName: string;
-
-
     let {friend}: {friend:string} = $props();
 
     let f:Friend=$state(new Friend());

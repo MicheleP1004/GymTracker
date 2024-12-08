@@ -65,15 +65,15 @@
         padding: 0.5em;
         font-size: 1.1em;
         display: flex;
-        align-items: center; /* Centrato su un asse orizzontale */
-        justify-content: space-between; /* Posiziona il bottone sulla destra */
+        align-items: center; 
+        justify-content: space-between; 
     }
 
     .dropdown img {
         border-radius: 50%;
         width: 30px;
         height: 30px;
-        margin-right: 10px; /* Spazio tra immagine e testo */
+        margin-right: 10px; 
     }
 
     .text {

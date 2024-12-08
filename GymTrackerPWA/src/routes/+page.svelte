@@ -58,7 +58,7 @@
   export async function requestNotificationPermission(id: string) {
     if (stato.pushToken) {
       console.log("Token FCM già presente:", stato.pushToken);
-      return; // Esci dalla funzione
+      return;
     }
 
   //controlla se il browser supporta le notifiche
@@ -249,6 +249,5 @@ async function setter(id: string): Promise<void> {
 {/if}
 
 {#if requestsVisibility}
-    <!-- <Chat visibility={requestsVisibility} on:chat-closed={handleChatClosure}/> -->
     <Modal visibility={requestsVisibility} component={RequestsList} props={{}} on:modal-closed={handleClosure}></Modal>
   {/if}

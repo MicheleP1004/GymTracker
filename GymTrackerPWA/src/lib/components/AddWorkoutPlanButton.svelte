@@ -1,5 +1,4 @@
 <script lang="ts">
-    // import Planner from "./Planner.svelte";
     import Modal from "./Modal.svelte";
     import PlannerPanel from "./PlannerPanel.svelte";
 
@@ -39,6 +38,5 @@
 </div>
 
 {#if plannerVisibility}
-    <!-- <Planner visibility={plannerVisibility} on:planner-closed={handleClosure}></Planner> -->
     <Modal visibility={plannerVisibility} component={PlannerPanel} props={{}} on:modal-closed={handleClosure}></Modal>
 {/if}

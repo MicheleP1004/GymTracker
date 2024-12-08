@@ -41,12 +41,6 @@ export function stopUserListener() {
   }
 }
 
-/**
- * Avvia un listener su una chat in Firestore.
- * @param chatKey - La chiave univoca della chat.
- * @param onUpdate - Funzione callback per aggiornare i dati della chat.
- * @returns Una funzione per interrompere il listener.
- */
 export function startChatListener(
   chatKey: string,
   onUpdate: (updatedChat: Chat) => void
@@ -72,26 +66,7 @@ export function startChatListener(
   return unsubscribe;
 }
 
-/**
- * Interrompe un listener Firestore.
- * @param unsubscribe - La funzione per interrompere il listener.
- */
 export function stopChatListener(unsubscribe: () => void): void {
   unsubscribe();
 }
 
-/**
- * Recupera una chat da Firestore.
- * @param id1 - ID del primo utente.
- * @param id2 - ID del secondo utente.
- * @returns Un'istanza della chat o null se non trovata.
- */
-export async function fetchChat(
-  id1: string,
-  id2: string
-): Promise<Chat | null> {
-  const chatKey = [id1, id2].sort().join(":");
-  console.log(`Fetching chat: ${chatKey}`);
-  // Simula il recupero di dati da Firestore
-  return new Chat(id1, id2, []); // Sostituisci con il fetch reale
-}

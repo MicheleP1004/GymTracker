@@ -55,11 +55,11 @@ export function printUtente(u:Utente){
     console.log("Email:", u.email);
     console.log("Username:", u.username);
     console.log("Bio:", u.bio);
-    console.log("Friends:", u.friends.join(", ")); // Stampa la lista di amici come una stringa separata da virgola
-    console.log("Workouts:", u.workouts); // Presumibilmente un array di oggetti Allenamento
-    console.log("Plans:", u.plans); // Presumibilmente un array di oggetti Plan
+    console.log("Friends:", u.friends.join(", "));
+    console.log("Workouts:", u.workouts);
+    console.log("Plans:", u.plans);
     console.log("Profile Picture URL:", u.propic);
-    console.log("Requests:", u.requests.join(", ")); // Stampa la lista delle richieste come una stringa separata da virgola
+    console.log("Requests:", u.requests.join(", "));
     console.log("Push Token:", u.pushToken);
 }
 
@@ -86,10 +86,10 @@ export class ChatManager {
     chats: Chat[] = [];
     tail: number = 0;
     head: number = 0;
-    private listeners: Map<string, () => void> = new Map(); // Listener attivi
+    private listeners: Map<string, () => void> = new Map();
   
     private getChatKey(id1: string, id2: string): string {
-      return [id1, id2].sort().join("_"); // Genera una chiave univoca per la chat
+      return [id1, id2].sort().join("_");
     }
   
     private addListener(chatKey: string, chat: Chat) {
@@ -113,43 +113,41 @@ export class ChatManager {
   
     public async addChat(id1: string, id2: string): Promise<Chat | null> {
       const chatKey = this.getChatKey(id1, id2);
-  
-      // Verifica se la chat esiste già
+
       const existingIndex = this.chats.findIndex(
         (c) => this.getChatKey(c.users[0], c.users[1]) === chatKey
       );
   
       if (existingIndex !== -1) {
         const existingChat = this.chats[existingIndex];
-        // Porta la chat in coda se non è già lì
         if (existingIndex !== this.tail) {
           this.head = this.tail;
           this.tail = (this.tail + 1) % maxChats;
         }
         return existingChat;
       }
-  
-      // Recupera la chat da Firestore
+
+      //recupera la chat
       const chatData = await fetchChat(id1, id2);
       if (!chatData) return null;
   
       const chat = new Chat(id1, id2, chatData.messages);
   
-      // Aggiungi o sostituisci la chat nella struttura circolare
+      //aggiunge o sostituisce la chat nel buffer circolare
       if (this.chats.length < maxChats) {
         this.chats.push(chat);
         this.tail = (this.tail + 1) % maxChats;
       } else {
         const oldestChat = this.chats[this.tail];
         const oldestKey = this.getChatKey(oldestChat.users[0], oldestChat.users[1]);
-        this.removeListener(oldestKey); // Interrompe il listener per la chat più vecchia
+        this.removeListener(oldestKey);
   
         this.chats[this.tail] = chat;
         this.head = (this.tail + 1) % maxChats;
         this.tail = (this.tail + 1) % maxChats;
       }
   
-      this.addListener(chatKey, chat); // Avvia il listener per la nuova chat
+      this.addListener(chatKey, chat);
       return chat;
     }
   
@@ -161,7 +159,7 @@ export class ChatManager {
   
       if (index !== -1) {
         this.chats.splice(index, 1);
-        this.removeListener(chatKey); // Rimuovi il listener della chat
+        this.removeListener(chatKey);
       }
     }
   
@@ -181,15 +179,12 @@ export class ChatManager {
 //     head:number=0;
 
 //     public async addChat(id1: string, id2: string): Promise<Chat|null> {
-//         // Controlla se la chat esiste già
 //         const existingIndex = this.chats.findIndex(
 //           (c) => c.users.includes(id1) && c.users.includes(id2)
 //         );
       
 //         if (existingIndex !== -1) {
-//           // Se esiste, sposta la chat esistente in coda
 //           const existingChat = this.chats[existingIndex];
-//           // Sposta la chat in coda se non è già lì
 //           if (existingIndex !== this.tail) {
 //             this.head = this.tail;
 //             this.tail = (this.tail + 1) % maxChats;
@@ -197,18 +192,15 @@ export class ChatManager {
 //           return existingChat;
 //         }
       
-//         // Recupera la chat da Firestore se non esiste
 //         const chat = await fetchChat(id1, id2);
 //         // const chat = await fetchChat(id1, id2, maxMsg);
 
 //         if(!chat){return null};
       
 //         if (this.chats.length < maxChats) {
-//           // Se c'è ancora spazio, aggiungi la chat
 //           this.chats.push(chat);
 //           this.tail = (this.tail + 1) % maxChats;
 //         } else {
-//           // Se non c'è spazio, sostituisci la chat più vecchia
 //           this.chats[this.tail] = chat;
 //           this.head = (this.tail + 1) % maxChats;
 //           this.tail = (this.tail + 1) % maxChats;
@@ -243,10 +235,6 @@ export class Allenamento{
     date: string = $state(new Date().toISOString().substring(0, 10));
     plan: string = $state('');
 }
-
-// export function setAllenamenti(a:Allenamento[]){
-//     stato.workouts = a;
-// }
 
 export function addAllenamento(piano:string,data:string){
     stato.workouts.push({plan:piano,date:data}as Allenamento);

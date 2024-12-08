@@ -29,8 +29,5 @@
     {#each stato.workouts as a}
         <WorkoutButton date={a.date} plan={a.plan}/>
     {/each}
-    <!-- {#if stato.workouts.length == 0}
-      <h1>prova</h1>
-    {/if} -->
     <p class="text">Non sono presenti altri allenamenti</p>
 </div>

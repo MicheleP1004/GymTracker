@@ -4,7 +4,6 @@ import { db,storage} from './firebase';
 import { type Utente,type Friend, Chat, type Message, defaultPic} from './globalState.svelte';
 import type { Esercizio,Scheda,Workout } from './data.svelte';
 
-//aggiunge un nuovo documento
 export async function addData(collectionName: string, data: object): Promise<void> {
   try {
     await addDoc(collection(db, collectionName), data);
@@ -13,7 +12,6 @@ export async function addData(collectionName: string, data: object): Promise<voi
   }
 }
 
-//ottieni tutti i documenti
 export async function getData(collectionName: string): Promise<DocumentData[]> {
   const querySnapshot: QuerySnapshot = await getDocs(collection(db, collectionName));
   return querySnapshot.docs.map(doc => doc.data());
@@ -338,16 +336,13 @@ export async function deleteRequest(id: string,uid:string): Promise<void> {
 
 export async function addFriend(id1: string, id2: string): Promise<void> {
   try {
-    // Creiamo un ID documento ordinato
-    const docId = [id1, id2].sort().join('_'); // Ordiniamo id1 e id2 per evitare duplicati
+    const docId = [id1, id2].sort().join('_');
 
-    // Aggiungiamo l'amicizia al documento
     await setDoc(doc(db, 'chats', docId), {
       users: [id1, id2],
       messages:[],
     });
 
-    // Aggiorniamo le liste amici dei due utenti
     const user1DocRef = doc(db, 'users', id1);
     const user2DocRef = doc(db, 'users', id2);
 
@@ -368,7 +363,6 @@ export async function addFriend(id1: string, id2: string): Promise<void> {
 
 export async function getUserDataAsFriend(id: string): Promise<Friend | null> {
   try {
-    // Recupera i dati dell'utente
     const userData = await getUserData(id);
 
     if (!userData) {
@@ -376,11 +370,10 @@ export async function getUserDataAsFriend(id: string): Promise<Friend | null> {
       return null;
     }
 
-    // Crea un oggetto Friend con i dati pertinenti
     const friend: Friend = {
       uid: userData.uid,
       username: userData.username,
-      propic: userData.propic || '', // Se l'immagine del profilo è mancante, assegna una stringa vuota
+      propic: userData.propic || '',
     };
 
     return friend;
@@ -392,14 +385,11 @@ export async function getUserDataAsFriend(id: string): Promise<Friend | null> {
 
 export async function deleteFriendship(id1: string, id2: string): Promise<void> {
   try {
-    // Creiamo un ID documento ordinato
-    const docId = [id1, id2].sort().join('_'); // Ordiniamo id1 e id2 per evitare duplicati
+    const docId = [id1, id2].sort().join('_');
 
-    // Rimuoviamo il documento dell'amicizia
     const friendshipDocRef = doc(db, 'chats', docId);
     await deleteDoc(friendshipDocRef);
 
-    // Rimuoviamo gli utenti dalla lista amici reciproca
     const user1DocRef = doc(db, 'users', id1);
     const user2DocRef = doc(db, 'users', id2);
 
@@ -418,12 +408,13 @@ export async function deleteFriendship(id1: string, id2: string): Promise<void> 
   }
 }
 
+//restituisce gli utenti con username contenenti il termine della ricerca
 export async function fetchUsersWithTerm(term: string): Promise<Friend[]> {
   try {
       const q = query(
           collection(db, 'users'),
           where('username', '>=', term),
-          where('username', '<=', term + '\uf8ff') // Filtro per nomi che iniziano con il termine
+          where('username', '<=', term + '\uf8ff')
       );
 
       const querySnapshot = await getDocs(q);
@@ -434,7 +425,7 @@ export async function fetchUsersWithTerm(term: string): Promise<Friend[]> {
           friends.push({
               uid: doc.id,
               username: data.username,
-              propic: data.propic || '', // Assicurati che `propic` sia opzionale o gestito in modo adeguato
+              propic: data.propic || '',
           });
       });
 
@@ -447,10 +438,8 @@ export async function fetchUsersWithTerm(term: string): Promise<Friend[]> {
 
 export async function deliverRequest(receiverId: string, senderId: string): Promise<void> {
   try {
-    // Riferimento al documento dell'utente ricevente
     const receiverDocRef = doc(db, 'users', receiverId);
 
-    // Aggiunge l'ID del mittente al campo "requests" del ricevente
     await updateDoc(receiverDocRef, {
       requests: arrayUnion(senderId)
     });
@@ -463,10 +452,10 @@ export async function deliverRequest(receiverId: string, senderId: string): Prom
 
 export async function storeFCMToken(id: string, token: string) {
   try {
-      const userRef = doc(db, 'users', id); // Usa l'id passato per il documento
+      const userRef = doc(db, 'users', id);
       await setDoc(userRef, {
           pushToken: token
-      }, { merge: true }); // Usa 'merge' per evitare di sovrascrivere altri dati
+      }, { merge: true });
       console.log("Token salvato per l'utente con ID:", id);
   } catch (error) {
       console.error("Errore durante il salvataggio del token:", error);
@@ -475,13 +464,12 @@ export async function storeFCMToken(id: string, token: string) {
 
 export async function getPushToken(id: string): Promise<string | null> {
   try {
-    // Recupera il documento dell'utente dalla collection 'users'
     const userDocRef = doc(db, 'users', id);
     const userDoc = await getDoc(userDocRef);
 
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      // Restituisce il pushToken se presente
+      //restituisce il pushToken se presente
       return userData?.pushToken || null;
     } else {
       console.log(`Utente con ID ${id} non trovato.`);
@@ -493,21 +481,20 @@ export async function getPushToken(id: string): Promise<string | null> {
   }
 }
 
+//ottiene il token utente e crea un documento in 'notifications' per inviare notifiche push
 export async function sendNotification(id: string, title: string, body: string, icon: string) {
   try {
-    // Ottieni il pushToken dell'utente
     const token = await getPushToken(id);
     if (!token) {
       console.log('Token non trovato, impossibile inviare la notifica');
       return;
     }
 
-    // Crea un nuovo documento nella collection 'notifications' per inviare la notifica
     await addDoc(collection(db, 'notifications'), {
       title: title,
       body: body,
       icon: icon,
-      token: token,  // Usa il token dell'utente per inviare la notifica
+      token: token,
     });
 
     console.log('Notifica aggiunta alla collection notifications');
@@ -555,17 +542,16 @@ export async function fetchChat(id1: string, id2: string): Promise<Chat | null> 
 //   const chatsCollection = collection(db, 'chats');
 //   const chatDocRef = doc(chatsCollection, chatDocId);
 
-//   // Verifica se la chat esiste
+//   
 //   const chatDocSnapshot = await getDocs(query(chatsCollection));
 //   if (chatDocSnapshot.empty) {
 //     console.error('Chat non trovata per gli ID:', id1, id2);
 //     return null;
 //   }
 
-//   // Ottieni la sottocollezione `messages` per eseguire la query
 //   const messagesCollection = collection(chatDocRef, 'messages');
 
-//   // Query per i primi n messaggi
+//   //solo i primi maxMsg messaggi
 //   const messagesQuery = query(
 //     messagesCollection,
 //     orderBy('timestamp', 'desc'),
@@ -580,10 +566,9 @@ export async function fetchChat(id1: string, id2: string): Promise<Chat | null> 
 //     timestamp: doc.data().timestamp,
 //   }));
 
-//   // Ottieni il cursore per il prossimo caricamento
+//   //prende il cursore
 //   const lastVisible = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null;
 
-//   // Crea e restituisci l'oggetto Chat
 //   const chat = new Chat(sortedId1, sortedId2, messages);
 //   chat.cursor = lastVisible; // Imposta il cursore
 //   return chat;
@@ -599,27 +584,23 @@ export async function sendMessage(receiver: string, sender: string, text: string
     return;
   }
 
-  // Ordina gli ID per garantire che l'ordine sia sempre lo stesso
+  //generazione id univoco della chat
   const [sortedReceiver, sortedSender] = [receiver, sender].sort();
-
-  // Genera l'ID del documento della chat
   const chatDocId = `${sortedReceiver}_${sortedSender}`;
 
-  // Crea un riferimento al documento della chat
   const chatDocRef = doc(collection(db, 'chats'), chatDocId);
 
-  // Crea un nuovo messaggio
   const newMessage: Message = {
     sender,
     text,
     timestamp: Date.now(),
   };
 
-  // Aggiungi il nuovo messaggio all'array "messages" nel documento della chat
   try {
     await updateDoc(chatDocRef, {
       messages: arrayUnion(newMessage), 
     });
+
     console.log('Messaggio inviato con successo');
     sendNotification(receiver,"Nuovo Messaggio!","Hai ricevuto un nuovo messaggio da "+me?.username,me?.propic||defaultPic);
   } catch (error) {

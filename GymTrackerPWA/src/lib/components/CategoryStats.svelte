@@ -27,11 +27,9 @@
     let weeksFlex: number[] = new Array(12).fill(0);
     let weeksCardio: number[] = new Array(12).fill(0);
 
-    // Riferimento al canvas
     // svelte-ignore non_reactive_update
         let chartCanvas: HTMLCanvasElement | null = null;
 
-    // Istanze del grafico
     let chartInstance: Chart | null = null;
 
     $effect(() => {
@@ -44,14 +42,14 @@
         }
 
         if (initialized && chartCanvas) {
-            createChart();  // Creo il grafico solo dopo che il canvas è disponibile
+            createChart();
             console.log(weeksCardio,weeksFlex,weeksStrength);
         }
 
         loading = !(flags.fetchE && flags.fetchW && flags.fetchS);
     });
 
-    // Distruzione del grafico al dismount del componente
+    //distruzione del grafico al dismount del componente
     onDestroy(() => {
         if (chartInstance) {
             chartInstance.destroy();
@@ -111,30 +109,25 @@
     function weeksAgo(eventDateStr: string, today: Date): number {
     const msPerDay = 24 * 60 * 60 * 1000;
 
-    // Data dell'evento e controllo validità
     const eventDate = new Date(eventDateStr);
     if (isNaN(eventDate.getTime())) {
         console.error(`Data non valida: ${eventDateStr}`);
         return -1;
     }
 
-    // Calcolo dell'inizio della settimana corrente (lunedì)
     const todayStartOfWeek = new Date(today);
     todayStartOfWeek.setHours(0, 0, 0, 0);
     todayStartOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
 
-    // Calcolo dell'inizio della settimana dell'evento (lunedì)
     const eventStartOfWeek = new Date(eventDate);
     eventStartOfWeek.setHours(0, 0, 0, 0);
     eventStartOfWeek.setDate(eventDate.getDate() - eventDate.getDay() + (eventDate.getDay() === 0 ? -6 : 1));
 
-    // Differenza in giorni tra l'inizio delle due settimane
     const dayDifference = Math.floor((todayStartOfWeek.getTime() - eventStartOfWeek.getTime()) / msPerDay);
 
-    // Calcolo della differenza in settimane
     const weekDifference = Math.floor(dayDifference / 7);
 
-    // Restituisci -1 se l'evento è di questa settimana o oltre 12 settimane fa
+    //restituisci -1 se l'evento è di questa settimana o oltre 12 settimane fa
     if (weekDifference < 1 || weekDifference > 12) {
         return -1;
     }
@@ -142,7 +135,7 @@
     return weekDifference - 1;
 }
 
-    // Crea il grafico
+    //crea il grafico
     function createChart() {
 
         if (!chartCanvas) {
@@ -156,12 +149,11 @@
             return;
         }
 
-        // Distruggi il grafico precedente, se esiste
+        //distrugge il grafico precedente, se esiste
         if (chartInstance) {
             chartInstance.destroy();
         }
 
-        // Configurazione dei dati e opzioni
         const data = {
             labels: Array.from({ length: 12 }, (_, i) => `Week ${i + 1}`).reverse(),
             datasets: [
@@ -185,7 +177,6 @@
             }
         };
 
-        // Creazione del grafico
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data,

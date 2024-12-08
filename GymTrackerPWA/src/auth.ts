@@ -1,6 +1,6 @@
 import { auth } from './firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, signInWithPopup, GoogleAuthProvider  } from 'firebase/auth';
-import type { UserCredential } from 'firebase/auth'; //importazione di tipo
+import type { UserCredential } from 'firebase/auth';
 
 import * as store from './firestore';
 

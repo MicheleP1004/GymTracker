@@ -9,7 +9,6 @@
 
     let tipo:string = $state('');
 
-    // import ModalStats from "./ModalStats.svelte";
 	import Modal from "./Modal.svelte";
   import CategoryStats from "./CategoryStats.svelte";
 
@@ -51,11 +50,6 @@
     background-color: #4fc080;
     place-items: center;
   }
-  /* .icon{
-    border-radius: 50%;
-    background-color: #ffffff;
-    align-self: center;
-  } */
 
   .button{
     border-radius: 50%;
@@ -77,19 +71,16 @@
   <ProfileInfo propic={stato.propic} userName={stato.username} bio={stato.bio}></ProfileInfo> 
   <div class="icons-section">
     <div class="icon-border">
-      <!-- <img class="icon" src={cardioImg} alt=""> -->
       <div class="button" onclick={()=>triggerModal("cardio")} onkeyup={()=>triggerModal("cardio")} role="button" tabindex="0">
         <img class="center" src={cardioImg} alt="">
       </div>
     </div>
     <div class="icon-border">
-      <!-- <img class="icon" src={strengthImg} alt=""> -->
       <div class="button" onclick={()=>triggerModal("strength")} onkeyup={()=>triggerModal("strength")} role="button" tabindex="0">
         <img class="center" src={strengthImg} alt="">
       </div>
     </div>
     <div class="icon-border">
-      <!-- <img class="icon" src={flexibilityImg} alt=""> -->
       <div class="button" onclick={()=>triggerModal("flex")} onkeyup={()=>triggerModal("flex")} role="button" tabindex="0">
         <img class="center" src={flexibilityImg} alt="">
       </div>
@@ -98,6 +89,5 @@
 </div>
 
 {#if modalVisibility}
-    <!-- <ModalStats visibility={modalVisibility} s={tipo} on:modal-closed={handleClosure}></ModalStats> -->
     <Modal visibility={modalVisibility} component={CategoryStats} props={{tipo}} on:modal-closed={handleClosure}></Modal>
 {/if}
