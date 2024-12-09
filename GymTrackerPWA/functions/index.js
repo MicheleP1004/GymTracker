@@ -15,7 +15,9 @@ exports.sendPushNotification = onDocumentCreated("notifications/{notificationId}
         notification: {
             title: title,
             body: body,
-            icon: icon
+        },
+        data: {
+            icon: icon 
         },
         token: token,
     };

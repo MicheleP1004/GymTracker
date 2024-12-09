@@ -278,8 +278,6 @@ export function removeRequest(id: string) {
 }
 
 export async function removeFriend(id:string){
-    // let f:string[] = stato.friends.filter(friend => friend === id);
-    // console.log(f.length,"!");
     //filtra l'array degli amici
     stato.friends = stato.friends.filter(friend => friend !== id);
 

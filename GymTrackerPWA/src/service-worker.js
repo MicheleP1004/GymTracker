@@ -1,16 +1,15 @@
-// Importa i file necessari per il service worker
+
 import { build, files, version } from '$service-worker';
 
-// Dichiara il nome della cache
+
 const CACHE = `cache-${version}`;
 
-// Unisci tutte le risorse necessarie nella cache
+
 const ASSETS = [
-    ...build, // l'app stessa
-    ...files  // tutti i file in `static`
+    ...build, 
+    ...files  
 ];
 
-// Gestisci l'evento di installazione del service worker
 self.addEventListener('install', (event) => {
     async function addFilesToCache() {
         const cache = await caches.open(CACHE);
@@ -20,7 +19,6 @@ self.addEventListener('install', (event) => {
     event.waitUntil(addFilesToCache());
 });
 
-// Gestisci l'evento di attivazione del service worker
 self.addEventListener('activate', (event) => {
     async function deleteOldCaches() {
         for (const key of await caches.keys()) {
@@ -31,7 +29,6 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(deleteOldCaches());
 });
 
-// Gestisci le richieste di fetch (utilizza la cache o la rete)
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
 
@@ -39,7 +36,6 @@ self.addEventListener('fetch', (event) => {
         const url = new URL(event.request.url);
         const cache = await caches.open(CACHE);
 
-        // Se il file è nella lista degli asset, prova a servirlo dalla cache
         if (ASSETS.includes(url.pathname)) {
             const cachedResponse = await cache.match(url.pathname);
             if (cachedResponse) {
@@ -47,7 +43,6 @@ self.addEventListener('fetch', (event) => {
             }
         }
 
-        // In caso contrario, prova a fare una richiesta di rete e metti in cache la risposta
         try {
             const response = await fetch(event.request);
             const isNotExtension = url.protocol == 'http:';
