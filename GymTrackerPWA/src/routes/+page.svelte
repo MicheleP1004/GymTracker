@@ -56,10 +56,10 @@
 
   //funzione di richiesta permesso per le notifiche
   export async function requestNotificationPermission(id: string) {
-    if (stato.pushToken) {
-      console.log("Token FCM già presente:", stato.pushToken);
-      return;
-    }
+    // if (stato.pushToken) {
+    //   console.log("Token FCM già presente:", stato.pushToken);
+    //   return;
+    // }
 
   //controlla se il browser supporta le notifiche
   if ('Notification' in window) {
@@ -83,14 +83,15 @@
               vapidKey: vapidKey
             });
 
-            if (token) {
+            if (token && token !== stato.pushToken) {
               console.log("Token FCM ricevuto:", token);
 
               //salva il token nel database Firestore
               await storeFCMToken(id, token);
+              stato.pushToken=token;
               console.log("Token salvato nel database.");
             } else {
-              console.log("Non è stato possibile ottenere il token.");
+              console.log("Token già presente o impossibile da ottenere.");
             }
           } else {
             console.error('Il Service Worker non è attivo');

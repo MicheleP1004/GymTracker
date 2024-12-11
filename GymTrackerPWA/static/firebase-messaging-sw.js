@@ -15,6 +15,8 @@ firebase.initializeApp(firebaseConfig);
 //ottiene il servizio di messaggistica
 const messaging = firebase.messaging();
 
+console.log("ciao");
+
 //gestisce i messaggi in background
 messaging.onBackgroundMessage((payload) => {
     console.log("Notifica ricevuta in background:", payload);
