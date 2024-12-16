@@ -19,3 +19,5 @@ da /GymTrackerPWA
 
 npm run build
 npm run preview
+
+git hub: https://github.com/MicheleP1004/GymTracker
